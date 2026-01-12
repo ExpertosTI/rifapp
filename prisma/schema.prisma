@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Ticket {
+  id        String   @id @default(uuid())
+  ticketNumber String @unique
+  name      String
+  email     String
+  phone     String
+  status    String   @default("PENDING") // PENDING, CONFIRMED
+  createdAt DateTime @default(now())
+}

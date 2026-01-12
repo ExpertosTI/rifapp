@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: JustDtBase2027@
+      POSTGRES_DB: rifapp
+    volumes:
+      - rifapp_db_vol_final:/var/lib/postgresql/data
+    networks:
+      - rifapp_internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  app:
+    # IMAGEN DESDE GITHUB REGISTRY (Construida por el Action)
+    image: ghcr.io/expertosti/rifapp:latest
+    environment:
+      # Password DB con %40 (Fix para el @)
+      - DATABASE_URL=postgresql://postgres:JustDtBase2027%40@db:5432/rifapp?schema=public
+      - NODE_ENV=production
+      - PORT=7165
+      # Correo
+      - SMTP_HOST=smtp.hostinger.com
+      - SMTP_PORT=465
+      - SMTP_USER=info@renace.space
+      - SMTP_PASS=JustWork2027@
+    networks:
+      - rifapp_internal
+      - RenaceNet
+    depends_on:
+      - db
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        # Traefik Config
+        - "traefik.enable=true"
+        - "traefik.http.routers.rifapp.rule=Host(`rifapp.renace.space`)"
+        - "traefik.http.routers.rifapp.entrypoints=websecure"
+        - "traefik.http.routers.rifapp.tls=true"
+        - "traefik.http.routers.rifapp.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.rifapp.loadbalancer.server.port=7165"
+        - "traefik.docker.network=RenaceNet"
+
+networks:
+  rifapp_internal:
+    driver: overlay
+  RenaceNet:
+    external: true
+
+volumes:
+  rifapp_db_vol_final:

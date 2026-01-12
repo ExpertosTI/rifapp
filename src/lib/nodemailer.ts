@@ -1,0 +1,40 @@
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.ethereal.email',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    auth: {
+        user: process.env.SMTP_USER || 'user',
+        pass: process.env.SMTP_PASS || 'pass'
+    }
+});
+
+interface SendEmailProps {
+    to: string;
+    subject: string;
+    html: string;
+}
+
+export const sendEmail = async ({ to, subject, html }: SendEmailProps) => {
+    try {
+        const info = await transporter.sendMail({
+            from: '"Rifa Inmobiliaria" <noreply@rifapp.com>',
+            to,
+            subject,
+            html,
+        });
+
+        console.log("📨 Email sent: %s", info.messageId);
+        // Preview only available when sending through an Ethereal account
+        console.log("🔗 Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error("Error sending email:", error);
+        // In dev mode without real creds, we just log and pretend it worked
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`[MOCK EMAIL] To: ${to} | Subject: ${subject}`);
+            return { success: true, mocked: true };
+        }
+        return { success: false, error };
+    }
+};

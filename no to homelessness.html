@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rifa de Apartamento</title>
+  <style>
+    :root{
+      --bg:#fff; --text:#111; --muted:#666A6F; --accent:#000; --muted-bg:#F0F2F6; --success:#22c55e; --header-bg:#000; --header-text:#fff;
+      --transition: 240ms ease;
+    }
+    .dark{
+      --bg:#0b0b0c; --text:#e6e7e8; --muted:#9aa0a6; --accent:#fff; --muted-bg:#111217; --header-bg:#0b0b0c; --header-text:#fff; --btn-text:#000;
+    }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+    html,body{height:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;
+      transition:background var(--transition), color var(--transition);
+    }
+    .header{background:var(--header-bg);color:var(--header-text);padding:28px 16px 24px;text-align:center;transition:background var(--transition)}
+    .logo{display:inline-block;background:#fff;padding:8px;border-radius:12px;margin:0 auto 12px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,0.06)}
+    .logo svg { stroke: var(--header-bg); }
+    .logo-img{width:64px;height:64px;border-radius:8px;object-fit:contain;display:block;margin:0 auto}
+    .title{font-size:20px;font-weight:600;margin:0 0 12px}    
+    .header-row{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+    .counter{display:inline-flex;gap:12px;align-items:center;background:rgba(255,255,255,0.08);padding:10px 16px;border-radius:12px}
+    .counter .num{font-size:28px;font-weight:600}
+    .progress-wrap{width:100%;padding:0 16px;margin-top:20px}
+    .progress-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px;color:rgba(255,255,255,0.9)}
+    .progress{height:8px;background:rgba(255,255,255,0.12);border-radius:4px;overflow:hidden}
+    .progress > .fill{height:100%;background:var(--header-text);width:0%;transition:width 700ms ease}
+    .apartment{width:100%;height:300px;object-fit:cover;display:block}
+    .container{padding:20px;max-width:900px;margin:0 auto}
+    h2{font-size:28px;margin:0 0 12px}
+    p.description{color:var(--muted);line-height:1.6;margin:0 0 20px}
+    .features{display:grid;gap:12px;margin-bottom:24px}
+    .feature{display:flex;gap:12px;align-items:center;color:var(--muted)}
+    .dot{width:8px;height:8px;background:var(--header-text);border-radius:50%}
+    .price-box{background:var(--muted-bg);border-radius:16px;padding:20px;margin-bottom:20px}
+    .price-box .label{font-size:14px;color:var(--muted);margin-bottom:4px}
+    .price-box .price{font-size:36px;font-weight:600}
+    .btn{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:var(--btn-text, var(--header-text));height:48px;border-radius:12px;border:0;padding:0 16px;font-weight:600;cursor:pointer}
+    .btn.secondary{background:var(--bg);color:var(--text);border:1px solid #E7E8EC}
+    .theme-toggle{height:36px;border-radius:18px;padding:0 12px;border:0;background:transparent;color:var(--header-text);cursor:pointer;font-size:16px}
+    .form-group{margin-bottom:12px}
+    input[type="text"], input[type="email"], input[type="tel"]{width:100%;height:44px;border-radius:12px;border:1px solid #CBCBCB;padding:0 12px;font-size:15px;background:var(--bg);color:var(--text)}
+    .payment-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .pay-option{height:44px;border-radius:12px;border:2px solid var(--muted-bg);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--bg);color:var(--text)}
+    .pay-option.active{background:var(--accent);color:var(--header-text);border-color:var(--accent)}
+    .muted-box{background:var(--muted-bg);border-radius:12px;padding:16px}
+    .monospace{font-family:monospace;font-size:12px;background:var(--bg);padding:10px;border-radius:8px;overflow:auto}
+    .copy-btn{width:36px;height:36px;background:var(--accent);color:var(--header-text);border-radius:8px;border:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+    .copied{color:var(--success);font-size:12px;margin-top:8px}
+    .hint{font-size:12px;color:var(--muted);margin-top:12px}
+    .hidden{display:none}
+    .muted-small{font-size:12px;color:var(--muted)}
+    .footer-space{height:40px}
+    @media(min-width:700px){ .container{padding:40px} .apartment{height:420px} .logo-img{width:90px;height:90px} }
+  </style>
+</head>
+<body>
+  <header class="header" id="pageHeader">
+    <div class="logo">
+      <picture>
+        <source srcset="assets/logo/logo home.png" media="(prefers-color-scheme: dark)">
+        <img src="assets/logo/logo.png" srcset="assets/logo/logo@2x.png 2x" alt="Logo Rifa de Apartamento" class="logo-img" />
+      </picture>
+    </div>
+
+    <div class="header-row" style="gap:16px;justify-content:center">
+      <div style="text-align:center">
+        <h1 class="title">Rifa de Apartamento</h1>
+        <div class="counter" role="status" aria-live="polite">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="opacity:.95"><path d="M17 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          <div style="text-align:left">
+            <div class="num" id="participantCount">0</div>
+            <div style="font-size:14px;opacity:.9">participantes</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="progress-wrap" style="width:220px;">
+          <div class="progress-info">
+            <div id="countText">0 / 20,000 boletos</div>
+            <div id="percentText">0%</div>
+          </div>
+          <div class="progress" aria-hidden>
+            <div class="fill" id="progressFill" style="width:0%"></div>
+          </div>
+        </div>
+        <button id="themeToggle" class="theme-toggle" aria-label="Alternar tema">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <img class="apartment" src="https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="Apartamento de lujo" />
+
+  <main class="container" role="main">
+    <h2>Apartamento de Lujo</h2>
+    <p class="description">Apartamento moderno de 120m² en el corazón de la ciudad. Incluye 3 habitaciones, 2 baños, cocina equipada, balcón con vista panorámica y parqueadero.</p>
+
+    <div class="features">
+      <div class="feature"><span class="dot"></span><div>Ubicación privilegiada</div></div>
+      <div class="feature"><span class="dot"></span><div>Acabados de primera</div></div>
+      <div class="feature"><span class="dot"></span><div>Vista panorámica</div></div>
+    </div>
+
+    <div class="price-box">
+      <div class="label">Precio del boleto</div>
+      <div class="price">$500.00</div>
+    </div>
+
+    <button id="toggleForm" class="btn" type="button">Comprar Boleto</button>
+
+    <form id="purchaseForm" class="hidden" onsubmit="return false" style="margin-top:20px">
+      <div class="form-group">
+        <label class="muted-small">Nombre completo</label>
+        <input id="buyer_name" type="text" placeholder="Juan Pérez" />
+      </div>
+      <div class="form-group">
+        <label class="muted-small">Email</label>
+        <input id="buyer_email" type="email" placeholder="juan@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="muted-small">Teléfono (opcional)</label>
+        <input id="buyer_phone" type="tel" placeholder="+1234567890" />
+      </div>
+
+      <div class="form-group">
+        <label class="muted-small">NIT / Tax ID (opcional)</label>
+        <input id="buyer_taxid" type="text" placeholder="NIT / RUT / Tax ID" />
+      </div>
+      <div class="form-group">
+        <label class="muted-small">Dirección (opcional)</label>
+        <input id="buyer_address" type="text" placeholder="Dirección" />
+      </div>
+
+      <div style="margin:8px 0 12px">
+        <div style="font-weight:500;margin-bottom:8px">Método de pago</div>
+        <div class="payment-grid">
+          <button type="button" data-method="cash" class="pay-option active">💵 Efectivo</button>
+          <button type="button" data-method="usdt" class="pay-option">💎 USDT</button>
+          <button type="button" data-method="visa" class="pay-option">💳 Visa</button>
+          <button type="button" data-method="mastercard" class="pay-option">💳 Mastercard</button>
+        </div>
+      </div>
+
+      <div id="usdtBlock" class="muted-box hidden" style="margin-bottom:12px">
+        <div style="font-weight:500;margin-bottom:10px">Enviar USDT (TRC20) a:</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="monospace" id="usdtAddress">TXzxKLkhVvqKFQQZJqWEasy8y9YM3ZyJzD</div>
+          <button id="copyBtn" class="copy-btn" type="button" title="Copiar dirección">📋</button>
+        </div>
+        <div id="copiedText" class="copied hidden">✓ Dirección copiada</div>
+        <div style="margin-top:8px">
+          <label class="muted-small">ID de transacción (TXID)</label>
+          <input id="txid_input" type="text" placeholder="Ej: 0x..." style="width:100%;height:40px;border-radius:8px;border:1px solid #CBCBCB;padding:0 8px;margin-top:6px;background:var(--bg);color:var(--text)"/>
+        </div>
+        <div class="hint">Después de enviar los $500 USDT, confirma tu compra aquí.</div>
+      </div>
+
+      <div id="cardBlock" class="muted-box hidden" style="margin-bottom:12px">
+        <div style="font-weight:500;margin-bottom:10px">Información de pago con tarjeta</div>
+        <div class="muted-small">Contacta con nosotros para procesar el pago con <span id="cardTypeText">Visa</span>. Te enviaremos los detalles por correo electrónico después de confirmar tu compra.</div>
+      </div>
+
+      <button id="confirmBtn" class="btn" type="button">Confirmar Compra</button>
+    </form>
+
+    <div class="footer-space"></div>
+  </main>
+
+  <script>
+    // Config
+    const USDT_ADDRESS = 'TXzxKLkhVvqKFQQZJqWEasy8y9YM3ZyJzD';
+    const totalTickets = 20000;
+    let participantCount = 0;
+    let fetchIntervalId = null;
+    let pending = false;
+
+    // Elements
+    const participantEl = document.getElementById('participantCount');
+    const countTextEl = document.getElementById('countText');
+    const percentTextEl = document.getElementById('percentText');
+    const progressFill = document.getElementById('progressFill');
+    const toggleFormBtn = document.getElementById('toggleForm');
+    const formEl = document.getElementById('purchaseForm');
+    const usdtBlock = document.getElementById('usdtBlock');
+    const cardBlock = document.getElementById('cardBlock');
+    const usdtAddressEl = document.getElementById('usdtAddress');
+    const copyBtn = document.getElementById('copyBtn');
+    const copiedText = document.getElementById('copiedText');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const cardTypeText = document.getElementById('cardTypeText');
+    const themeToggle = document.getElementById('themeToggle');
+
+    // Inputs
+    const inputName = document.getElementById('buyer_name');
+    const inputEmail = document.getElementById('buyer_email');
+    const inputPhone = document.getElementById('buyer_phone');
+    const taxIdInput = document.getElementById('buyer_taxid');
+    const addressInput = document.getElementById('buyer_address');
+    const txidInput = document.getElementById('txid_input');
+
+    // Payment selection
+    const payButtons = document.querySelectorAll('.pay-option');
+    let paymentMethod = 'cash';
+
+    // Theme handling
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const THEME_KEY = 'theme'; // values: 'dark'|'light'|'system' (null==system)
+
+    function getSavedTheme() { return localStorage.getItem(THEME_KEY); }
+    function applyTheme(mode){
+      let effective = mode;
+      if (!mode || mode === 'system') effective = prefersDark.matches ? 'dark' : 'light';
+      document.documentElement.classList.toggle('dark', effective === 'dark');
+      themeToggle.textContent = effective === 'dark' ? '☀️' : '🌙';
+    }
+    function setTheme(mode){
+      if (!mode) { localStorage.removeItem(THEME_KEY); }
+      else localStorage.setItem(THEME_KEY, mode);
+      applyTheme(mode);
+    }
+
+    // initialize theme
+    (function initTheme(){
+      const saved = getSavedTheme();
+      if (saved) applyTheme(saved);
+      else applyTheme('system');
+      // listen for system changes when user hasn't chosen explicitly
+      prefersDark.addEventListener('change', () => { if (!getSavedTheme()) applyTheme('system'); });
+    })();
+
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      setTheme(next); // explicit choice (overrides system)
+    });
+
+    // Allow long-press (right-click) on toggle to reset to system preference
+    themeToggle.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      setTheme(null); // system
+      alert('Tema: modo del sistema (predeterminado)');
+    });
+
+    // UI update
+    usdtAddressEl.textContent = USDT_ADDRESS;
+    function updateUI(){
+      participantEl.textContent = participantCount.toLocaleString();
+      countTextEl.textContent = `${participantCount.toLocaleString()} / ${totalTickets.toLocaleString()} boletos`;
+      const pct = Math.min(100, (participantCount / totalTickets) * 100);
+      percentTextEl.textContent = pct.toFixed(1) + '%';
+      progressFill.style.width = pct + '%';
+    }
+
+    async function fetchCount(){
+      try {
+        const res = await fetch('/api/tickets/count');
+        if (!res.ok) throw new Error('No ok');
+        const data = await res.json();
+        participantCount = data.count ?? 0;
+        updateUI();
+      } catch (err) {
+        console.warn('Fetch count failed', err);
+      }
+    }
+
+    // Poll every 5s
+    fetchCount();
+    fetchIntervalId = setInterval(fetchCount, 5000);
+
+    // Toggle form
+    toggleFormBtn.addEventListener('click', () => {
+      formEl.classList.toggle('hidden');
+      if (!formEl.classList.contains('hidden')) formEl.scrollIntoView({behavior:'smooth', block:'center'});
+    });
+
+    // Payment selection handlers
+    payButtons.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        payButtons.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        paymentMethod = btn.dataset.method;
+        usdtBlock.classList.toggle('hidden', paymentMethod !== 'usdt');
+        const cardVisible = (paymentMethod === 'visa' || paymentMethod === 'mastercard');
+        cardBlock.classList.toggle('hidden', !cardVisible);
+        cardTypeText.textContent = paymentMethod === 'visa' ? 'Visa' : 'Mastercard';
+      });
+    });
+
+    // Copy to clipboard
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(USDT_ADDRESS);
+        copiedText.classList.remove('hidden');
+        setTimeout(()=>copiedText.classList.add('hidden'), 2000);
+      } catch (err) {
+        alert('No se pudo copiar. Usa un navegador seguro (https) compatible con clipboard.');
+      }
+    });
+
+    // Submit purchase
+    confirmBtn.addEventListener('click', async () => {
+      const name = inputName.value.trim();
+      const email = inputEmail.value.trim();
+      const phone = inputPhone.value.trim();
+      const taxId = taxIdInput.value.trim();
+      const address = addressInput.value.trim();
+      const txid = txidInput.value.trim();
+
+      if (!name || !email) {
+        alert('Por favor completa todos los campos requeridos');
+        return;
+      }
+      if (paymentMethod === 'usdt' && !txid) {
+        alert('Para pago USDT, por favor ingresa el ID de la transacción (TXID).');
+        return;
+      }
+      if (pending) return;
+
+      pending = true;
+      confirmBtn.textContent = 'Procesando...';
+      confirmBtn.disabled = true;
+
+      try {
+        const body = {
+          buyer_name: name,
+          buyer_email: email,
+          buyer_phone: phone,
+          buyer_taxid: taxId,
+          buyer_address: address,
+          payment_method: paymentMethod,
+          txid: txid || undefined,
+        };
+        const res = await fetch('/api/tickets', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(()=>({message:'Error al comprar'}));
+          throw new Error(err.message || 'Error al comprar');
+        }
+        const data = await res.json();
+        inputName.value = '';
+        inputEmail.value = '';
+        inputPhone.value = '';
+        taxIdInput.value = '';
+        addressInput.value = '';
+        txidInput.value = '';
+        paymentMethod = 'cash';
+        payButtons.forEach(b=>b.classList.toggle('active', b.dataset.method === 'cash'));
+        usdtBlock.classList.add('hidden');
+        cardBlock.classList.add('hidden');
+        formEl.classList.add('hidden');
+        await fetchCount();
+        if (data.invoiceUrl) {
+          alert('¡Éxito! Se generó y envió la factura a tu correo. Abriendo factura...');
+          window.open(data.invoiceUrl, '_blank');
+        } else {
+          alert('¡Éxito! ¡Boleto comprado exitosamente!');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error: ' + (err.message || 'No se pudo comprar el boleto'));
+      } finally {
+        pending = false;
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Confirmar Compra';
+      }
+    });
+
+    window.addEventListener('beforeunload', ()=>{ if (fetchIntervalId) clearInterval(fetchIntervalId); });
+  </script>
+</body>
+</html>
