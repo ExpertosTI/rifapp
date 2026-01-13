@@ -28,8 +28,8 @@ export async function generateTicketAction(formData: FormData) {
   // Generate a unique ticket code
   const ticketCode = "APT-" + Math.random().toString(36).substr(2, 6).toUpperCase() + "-" + new Date().getFullYear();
 
+  // Step 1: Save to Database
   try {
-    // Save to Database with PENDING status (awaiting payment confirmation)
     await prisma.ticket.create({
       data: {
         ticketNumber: ticketCode,
@@ -40,8 +40,13 @@ export async function generateTicketAction(formData: FormData) {
         paymentProof: paymentProof || null
       }
     });
+  } catch (dbError) {
+    console.error("Database error creating ticket:", dbError);
+    return { error: "Error al guardar el ticket en la base de datos." };
+  }
 
-    // Send email notification
+  // Step 2: Try to send email (non-blocking - ticket is already saved)
+  try {
     await sendEmail({
       to: result.data.email,
       subject: "🎟️ Tu Ticket para la Rifa Inmobiliaria - Pendiente de Confirmación",
@@ -59,10 +64,10 @@ export async function generateTicketAction(formData: FormData) {
           </div>
         `,
     });
-
-    return { success: true, ticket: ticketCode };
-  } catch (error) {
-    console.error("Error creating ticket:", error);
-    return { error: "Error al generar el ticket. Intenta nuevamente." };
+  } catch (emailError) {
+    // Email failed but ticket was saved - log but don't fail
+    console.error("Email notification failed (ticket was saved):", emailError);
   }
+
+  return { success: true, ticket: ticketCode };
 }
