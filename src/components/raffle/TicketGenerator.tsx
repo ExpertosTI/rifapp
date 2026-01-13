@@ -45,13 +45,13 @@ export const TicketGenerator = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    className="relative w-full overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/5 p-8 backdrop-blur-2xl md:p-14 shadow-2xl"
+                    className="relative w-full overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] border border-white/10 bg-white/5 p-6 backdrop-blur-2xl md:p-14 shadow-2xl"
                 >
                     <div className="flex flex-col items-center text-center">
-                        <h2 className="mb-6 text-3xl font-medium tracking-tight text-white md:text-5xl">
+                        <h2 className="mb-4 text-2xl font-medium tracking-tight text-white md:mb-6 md:text-5xl">
                             Obtén tu Ticket
                         </h2>
-                        <p className="mb-10 max-w-lg text-lg font-light text-white/60">
+                        <p className="mb-6 max-w-lg text-base font-light text-white/60 md:mb-10 md:text-lg">
                             Completa el formulario para participar en el sorteo exclusivo.
                         </p>
 
@@ -63,21 +63,21 @@ export const TicketGenerator = () => {
                                         type="text"
                                         placeholder="Nombre Completo"
                                         required
-                                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-lg text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-white/30 focus:bg-white/10 focus:outline-none"
+                                        className="w-full rounded-xl md:rounded-2xl border border-white/10 bg-white/5 px-4 py-3 md:px-6 md:py-4 text-base md:text-lg text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-white/30 focus:bg-white/10 focus:outline-none"
                                     />
                                     <input
                                         name="email"
                                         type="email"
                                         placeholder="Correo Electrónico"
                                         required
-                                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-lg text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-white/30 focus:bg-white/10 focus:outline-none"
+                                        className="w-full rounded-xl md:rounded-2xl border border-white/10 bg-white/5 px-4 py-3 md:px-6 md:py-4 text-base md:text-lg text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-white/30 focus:bg-white/10 focus:outline-none"
                                     />
                                     <input
                                         name="phone"
                                         type="tel"
                                         placeholder="Teléfono"
                                         required
-                                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-lg text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-white/30 focus:bg-white/10 focus:outline-none"
+                                        className="w-full rounded-xl md:rounded-2xl border border-white/10 bg-white/5 px-4 py-3 md:px-6 md:py-4 text-base md:text-lg text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-white/30 focus:bg-white/10 focus:outline-none"
                                     />
                                 </div>
 
@@ -88,7 +88,7 @@ export const TicketGenerator = () => {
                                     whileTap={{ scale: 0.99 }}
                                     disabled={loading}
                                     type="submit"
-                                    className="group mt-2 flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-white text-lg font-semibold text-black shadow-xl transition-all hover:bg-white/90 disabled:opacity-50"
+                                    className="group mt-2 flex h-12 md:h-16 w-full items-center justify-center gap-3 rounded-xl md:rounded-2xl bg-white text-base md:text-lg font-semibold text-black shadow-xl transition-all hover:bg-white/90 disabled:opacity-50"
                                 >
                                     {loading ? (
                                         <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/30 border-t-black" />
