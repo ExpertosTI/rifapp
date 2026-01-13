@@ -6,34 +6,56 @@ import { setSession, clearSession, getSession, AdminPayload } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
 export async function loginAction(formData: FormData) {
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
+    try {
+        const email = formData.get('email') as string
+        const password = formData.get('password') as string
 
-    if (!email || !password) {
-        return { error: 'Email y contraseña son requeridos' }
+        if (!email || !password) {
+            return { error: 'Email y contraseña son requeridos' }
+        }
+
+        // Check if admin table exists and has users
+        const adminCount = await prisma.admin.count()
+
+        if (adminCount === 0) {
+            // Auto-create default admin if none exists
+            const hashedPassword = await bcrypt.hash('RifaAdmin2026!', 12)
+            await prisma.admin.create({
+                data: {
+                    email: 'admin@rifapp.renace.space',
+                    password: hashedPassword,
+                    name: 'Super Admin',
+                    role: 'SUPER_ADMIN'
+                }
+            })
+            console.log('Default admin created automatically')
+        }
+
+        const admin = await prisma.admin.findUnique({
+            where: { email }
+        })
+
+        if (!admin) {
+            return { error: 'Credenciales inválidas' }
+        }
+
+        const isValid = await bcrypt.compare(password, admin.password)
+        if (!isValid) {
+            return { error: 'Credenciales inválidas' }
+        }
+
+        await setSession({
+            id: admin.id,
+            email: admin.email,
+            name: admin.name,
+            role: admin.role
+        })
+
+        redirect('/admin')
+    } catch (error) {
+        console.error('Login error:', error)
+        return { error: 'Error del servidor. Intenta más tarde.' }
     }
-
-    const admin = await prisma.admin.findUnique({
-        where: { email }
-    })
-
-    if (!admin) {
-        return { error: 'Credenciales inválidas' }
-    }
-
-    const isValid = await bcrypt.compare(password, admin.password)
-    if (!isValid) {
-        return { error: 'Credenciales inválidas' }
-    }
-
-    await setSession({
-        id: admin.id,
-        email: admin.email,
-        name: admin.name,
-        role: admin.role
-    })
-
-    redirect('/admin')
 }
 
 export async function logoutAction() {
