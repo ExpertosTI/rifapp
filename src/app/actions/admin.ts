@@ -54,7 +54,9 @@ export async function loginAction(formData: FormData) {
         redirect('/admin')
     } catch (error) {
         console.error('Login error:', error)
-        return { error: 'Error del servidor. Intenta más tarde.' }
+        // Return specific error for debugging
+        const message = error instanceof Error ? error.message : String(error)
+        return { error: `Error: ${message}` }
     }
 }
 

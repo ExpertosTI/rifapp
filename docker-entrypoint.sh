@@ -18,11 +18,11 @@ sleep 5
 
 # Run database migrations
 echo "Running database migrations..."
-if [ -f "./node_modules/.bin/prisma" ]; then
-  ./node_modules/.bin/prisma db push --skip-generate --accept-data-loss || echo "Warning: Migration had issues, continuing..."
+if [ -d "./node_modules/prisma" ]; then
+  node node_modules/prisma/build/index.js db push --skip-generate --accept-data-loss || echo "Warning: Migration had issues, continuing..."
 else
-  echo "Warning: Prisma CLI not found at ./node_modules/.bin/prisma"
-  ls -la ./node_modules/.bin/ 2>/dev/null | head -20
+  echo "Warning: Prisma package not found at ./node_modules/prisma"
+  find ./node_modules -name "prisma" -maxdepth 2
 fi
 
 echo "========================================="
