@@ -5,13 +5,11 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
     LayoutDashboard, Ticket, Users, Trophy, LogOut,
     CheckCircle, XCircle, Clock, Eye, Search, Filter,
-    ChevronDown, MoreHorizontal, Sparkles
+    ChevronDown, MoreHorizontal, Sparkles, Menu, X
 } from "lucide-react"
 import { AdminPayload } from "@/lib/auth"
 import { logoutAction, confirmTicket, rejectTicket } from "@/app/actions/admin"
-import { logoutAction, confirmTicket, rejectTicket } from "@/app/actions/admin"
 import { useRouter } from "next/navigation"
-import { Menu, X } from "lucide-react"
 
 interface Props {
     session: AdminPayload
@@ -26,7 +24,6 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
     const [selectedTicket, setSelectedTicket] = useState<any>(null)
     const [showModal, setShowModal] = useState(false)
     const [rejectReason, setRejectReason] = useState("")
-    const [loading, setLoading] = useState(false)
     const [loading, setLoading] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const router = useRouter()
