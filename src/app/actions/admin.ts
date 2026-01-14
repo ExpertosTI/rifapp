@@ -53,6 +53,17 @@ export async function loginAction(formData: FormData) {
 
         redirect('/admin')
     } catch (error) {
+        // NEXT_REDIRECT is actually thrown as an error to trigger the redirect, 
+        // so we need to check if the error is a digest redirect error and rethrow it.
+        // However, a simpler way in action is to just redirect after success flag.
+        // But since we are here, we can check the error message structure.
+        if (
+            (error instanceof Error && error.message.includes('NEXT_REDIRECT')) ||
+            (typeof error === 'object' && error !== null && 'digest' in error && (error as any).digest?.includes('NEXT_REDIRECT'))
+        ) {
+            throw error
+        }
+
         console.error('Login error:', error)
         // Return specific error for debugging
         const message = error instanceof Error ? error.message : String(error)
