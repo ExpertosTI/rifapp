@@ -9,7 +9,9 @@ import {
 } from "lucide-react"
 import { AdminPayload } from "@/lib/auth"
 import { logoutAction, confirmTicket, rejectTicket } from "@/app/actions/admin"
+import { logoutAction, confirmTicket, rejectTicket } from "@/app/actions/admin"
 import { useRouter } from "next/navigation"
+import { Menu, X } from "lucide-react"
 
 interface Props {
     session: AdminPayload
@@ -25,6 +27,8 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
     const [showModal, setShowModal] = useState(false)
     const [rejectReason, setRejectReason] = useState("")
     const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [sidebarOpen, setSidebarOpen] = useState(false)
     const router = useRouter()
 
     const filteredTickets = tickets.filter(ticket => {
@@ -69,8 +73,36 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+            {/* Mobile Header */}
+            <div className="md:hidden fixed top-0 left-0 right-0 p-4 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800 z-50 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-bold">RifaApp</span>
+                </div>
+                <button
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="p-2 rounded-lg hover:bg-slate-800 transition-colors"
+                >
+                    {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
+            </div>
+
+            {/* Sidebar Overlay */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className="fixed left-0 top-0 h-full w-64 bg-slate-900/50 border-r border-slate-800 backdrop-blur-xl z-50">
+            <aside className={`
+                fixed left-0 top-0 h-full w-64 bg-slate-900/95 border-r border-slate-800 backdrop-blur-xl z-50
+                transition-transform duration-300 ease-in-out md:translate-x-0
+                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            `}>
                 <div className="p-6">
                     <div className="flex items-center gap-3 mb-8">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -117,7 +149,7 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
             </aside>
 
             {/* Main Content */}
-            <main className="ml-64 p-8">
+            <main className="pt-20 md:pt-8 md:ml-64 p-4 md:p-8">
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold">Dashboard</h1>

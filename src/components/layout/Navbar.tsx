@@ -1,8 +1,13 @@
-"use client";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
 export const Navbar = () => {
+    const pathname = usePathname();
+    const isLoginPage = pathname === "/admin/login"; // Keep navbar on login? Maybe not. Screenshot showed overlap.
+    // Actually, hide on all /admin
+    if (pathname?.startsWith("/admin")) return null;
+
     return (
         <motion.nav
             initial={{ y: -100, opacity: 0 }}
