@@ -45,15 +45,19 @@ export async function generateTicketAction(formData: FormData) {
     return { error: "Error al guardar el ticket en la base de datos." };
   }
 
+  // Fetch config for email details
+  const config = await prisma.raffleConfig.findFirst();
+  const productName = config?.productName || "Rifa Inmobiliaria";
+
   // Step 2: Try to send email (non-blocking - ticket is already saved)
   try {
     await sendEmail({
       to: result.data.email,
-      subject: "🎟️ Tu Ticket para la Rifa Inmobiliaria - Pendiente de Confirmación",
+      subject: `🎟️ Tu Ticket para ${productName} - Pendiente de Confirmación`,
       html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 40px; border-radius: 20px;">
             <h1 style="color: #fff; text-align: center;">🎉 ¡Hola ${result.data.name}!</h1>
-            <p style="color: #ccc; text-align: center; font-size: 18px;">Tu ticket ha sido registrado exitosamente.</p>
+            <p style="color: #ccc; text-align: center; font-size: 18px;">Tu ticket para <strong>${productName}</strong> ha sido registrado exitosamente.</p>
             <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; text-align: center; margin: 30px 0; border: 2px dashed #fbbf24;">
               <p style="color: #9ca3af; margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Tu Número de Ticket</p>
               <h2 style="color: #fbbf24; font-size: 36px; margin: 10px 0;">${ticketCode}</h2>

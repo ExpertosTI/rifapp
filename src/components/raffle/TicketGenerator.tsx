@@ -5,7 +5,7 @@ import { Copy, Check, Send, Ticket as TicketIcon, Upload, Image, PartyPopper, Sp
 import { generateTicketAction } from "@/app/actions/raffle";
 import confetti from "canvas-confetti";
 
-export const TicketGenerator = () => {
+export const TicketGenerator = ({ config }: { config?: any }) => {
     const [ticket, setTicket] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -128,10 +128,10 @@ export const TicketGenerator = () => {
                         </motion.div>
 
                         <h2 className="mb-4 text-2xl font-medium tracking-tight text-white md:mb-6 md:text-5xl">
-                            ¡Participa en la Rifa!
+                            ¡Participa por {config?.productName || "tu Premio"}!
                         </h2>
                         <p className="mb-6 max-w-lg text-base font-light text-white/60 md:mb-10 md:text-lg">
-                            Completa el formulario y adjunta tu comprobante de pago para obtener tu ticket.
+                            Completa el formulario y adjunta tu comprobante de pago de <span className="text-yellow-400 font-bold">${Number(config?.ticketPrice || 10).toFixed(2)}</span>.
                         </p>
 
                         <AnimatePresence mode="wait">
@@ -223,7 +223,7 @@ export const TicketGenerator = () => {
                                             <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/30 border-t-black" />
                                         ) : (
                                             <>
-                                                Participar Ahora <Sparkles className="h-5 w-5" />
+                                                Pagar ${Number(config?.ticketPrice || 10).toFixed(2)} <Sparkles className="h-5 w-5" />
                                             </>
                                         )}
                                     </motion.button>

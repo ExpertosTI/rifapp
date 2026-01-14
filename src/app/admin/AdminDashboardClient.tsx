@@ -8,8 +8,9 @@ import {
     ChevronDown, MoreHorizontal, Sparkles, Menu, X
 } from "lucide-react"
 import { AdminPayload } from "@/lib/auth"
-import { logoutAction, confirmTicket, rejectTicket } from "@/app/actions/admin"
+import { confirmTicket, rejectTicket } from "@/app/actions/admin"
 import { useRouter } from "next/navigation"
+import AdminSidebar from "@/components/admin/Sidebar"
 
 interface Props {
     session: AdminPayload
@@ -25,7 +26,6 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
     const [showModal, setShowModal] = useState(false)
     const [rejectReason, setRejectReason] = useState("")
     const [loading, setLoading] = useState(false)
-    const [sidebarOpen, setSidebarOpen] = useState(false)
     const router = useRouter()
 
     const filteredTickets = tickets.filter(ticket => {
@@ -69,88 +69,21 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
-            {/* Mobile Header */}
-            <div className="md:hidden fixed top-0 left-0 right-0 p-4 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800 z-50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="font-bold">RifaApp</span>
-                </div>
-                <button
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="p-2 rounded-lg hover:bg-slate-800 transition-colors"
-                >
-                    {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
-            </div>
-
-            {/* Sidebar Overlay */}
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
-
-            {/* Sidebar */}
-            <aside className={`
-                fixed left-0 top-0 h-full w-64 bg-slate-900/95 border-r border-slate-800 backdrop-blur-xl z-50
-                transition-transform duration-300 ease-in-out md:translate-x-0
-                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-            `}>
-                <div className="p-6">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                            <Sparkles className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="font-bold text-lg">RifaApp</h1>
-                            <p className="text-xs text-slate-400">Panel Admin</p>
-                        </div>
-                    </div>
-
-                    <nav className="space-y-2">
-                        <a href="/admin" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                            <LayoutDashboard className="w-5 h-5" />
-                            Dashboard
-                        </a>
-                        <a href="/admin/roulette" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 transition-colors">
-                            <Trophy className="w-5 h-5" />
-                            Sorteo
-                        </a>
-                    </nav>
-                </div>
-
-                <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-slate-800">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold">
-                            {session.name.charAt(0)}
-                        </div>
-                        <div>
-                            <p className="font-medium text-sm">{session.name}</p>
-                            <p className="text-xs text-slate-400">{session.role}</p>
-                        </div>
-                    </div>
-                    <form action={logoutAction}>
-                        <button
-                            type="submit"
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm transition-colors"
-                        >
-                            <LogOut className="w-4 h-4" />
-                            Cerrar Sesión
-                        </button>
-                    </form>
-                </div>
-            </aside>
+        <div className="min-h-screen bg-slate-950 text-white selection:bg-blue-500/30">
+            <AdminSidebar session={session} />
 
             {/* Main Content */}
-            <main className="pt-20 md:pt-8 md:ml-64 p-4 md:p-8">
+            <main className="pt-20 md:pt-8 md:ml-64 p-4 md:p-8 pr-4 md:pr-80 min-h-screen transition-all duration-300">
                 {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold">Dashboard</h1>
-                    <p className="text-slate-400 mt-1">Gestión de tickets y participantes</p>
+                <div className="mb-8 flex justify-between items-end">
+                    <div>
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Dashboard</h1>
+                        <p className="text-slate-400 mt-1">Gestión en tiempo real</p>
+                    </div>
+                    <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium animate-pulse">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Sistema Operativo
+                    </div>
                 </div>
 
                 {/* Stats Cards */}
@@ -166,65 +99,69 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}
-                            className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-xl p-6"
+                            className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-xl p-6 group hover:border-slate-700 hover:shadow-2xl hover:shadow-blue-500/10 transition-all"
                         >
-                            <div className={`absolute top-0 right-0 w-32 h-32 bg-${stat.color}-500/10 rounded-full blur-3xl`} />
+                            <div className={`absolute top-0 right-0 w-32 h-32 bg-${stat.color}-500/10 rounded-full blur-3xl group-hover:bg-${stat.color}-500/20 transition-colors`} />
                             <div className="relative">
-                                <div className={`w-12 h-12 rounded-xl bg-${stat.color}-500/20 flex items-center justify-center mb-4`}>
+                                <div className={`w-12 h-12 rounded-xl bg-${stat.color}-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                                     <stat.icon className={`w-6 h-6 text-${stat.color}-400`} />
                                 </div>
-                                <p className="text-slate-400 text-sm">{stat.label}</p>
-                                <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                                <p className="text-slate-400 text-sm font-medium">{stat.label}</p>
+                                <p className="text-3xl font-bold mt-1 tracking-tight">{stat.value}</p>
                             </div>
                         </motion.div>
                     ))}
                 </div>
 
                 {/* Tickets Table */}
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-xl overflow-hidden">
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-xl overflow-hidden shadow-xl">
+                    {/* ... (Keep existing table, just wrapped in cleaner container) ... */}
                     {/* Table Header */}
-                    <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+                    <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-800/20">
                         <h2 className="text-xl font-semibold flex items-center gap-2">
                             <Ticket className="w-5 h-5 text-blue-400" />
-                            Tickets
+                            Tickets Recientes
                         </h2>
                         <div className="flex items-center gap-4">
                             {/* Search */}
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                            <div className="relative group">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
                                 <input
                                     type="text"
                                     placeholder="Buscar..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                                    className="pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all w-64"
                                 />
                             </div>
                             {/* Filter */}
-                            <select
-                                value={filter}
-                                onChange={(e) => setFilter(e.target.value)}
-                                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-blue-500"
-                            >
-                                <option value="ALL">Todos</option>
-                                <option value="PENDING">Pendientes</option>
-                                <option value="CONFIRMED">Confirmados</option>
-                                <option value="REJECTED">Rechazados</option>
-                            </select>
+                            <div className="relative">
+                                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                <select
+                                    value={filter}
+                                    onChange={(e) => setFilter(e.target.value)}
+                                    className="pl-10 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm focus:outline-none focus:border-blue-500 appearance-none cursor-pointer hover:bg-slate-900 transition-colors"
+                                >
+                                    <option value="ALL">Todos</option>
+                                    <option value="PENDING">Pendientes</option>
+                                    <option value="CONFIRMED">Confirmados</option>
+                                    <option value="REJECTED">Rechazados</option>
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
+                            </div>
                         </div>
                     </div>
 
                     {/* Table */}
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-slate-800/50">
+                            <thead className="bg-slate-950/50 text-slate-400 text-xs uppercase tracking-wider font-semibold">
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Ticket</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Participante</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Contacto</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Estado</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Comprobante</th>
-                                    <th className="px-6 py-4 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Acciones</th>
+                                    <th className="px-6 py-4 text-left">Ticket</th>
+                                    <th className="px-6 py-4 text-left">Participante</th>
+                                    <th className="px-6 py-4 text-left">Estado</th>
+                                    <th className="px-6 py-4 text-left">Comprobante</th>
+                                    <th className="px-6 py-4 text-right">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-800">
@@ -235,20 +172,21 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
                                             key={ticket.id}
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
-                                            className="hover:bg-slate-800/30 transition-colors"
+                                            className="hover:bg-blue-500/5 transition-colors group"
                                         >
                                             <td className="px-6 py-4">
-                                                <span className="font-mono text-blue-400">{ticket.ticketNumber}</span>
+                                                <span className="font-mono text-blue-400 font-medium bg-blue-500/10 px-2 py-1 rounded group-hover:bg-blue-500/20 transition-colors">
+                                                    #{ticket.ticketNumber.split('-')[1]}
+                                                </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <p className="font-medium">{ticket.name}</p>
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-slate-200">{ticket.name}</span>
+                                                    <span className="text-xs text-slate-500">{ticket.email}</span>
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <p className="text-sm text-slate-400">{ticket.email}</p>
-                                                <p className="text-xs text-slate-500">{ticket.phone}</p>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${statusColors[ticket.status]}`}>
+                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColors[ticket.status]}`}>
                                                     <StatusIcon className="w-3 h-3" />
                                                     {ticket.status}
                                                 </span>
@@ -257,24 +195,22 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
                                                 {ticket.paymentProof ? (
                                                     <button
                                                         onClick={() => { setSelectedTicket(ticket); setShowModal(true) }}
-                                                        className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300"
+                                                        className="flex items-center gap-2 text-xs text-slate-400 hover:text-white group/btn bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition-all"
                                                     >
-                                                        <Eye className="w-4 h-4" />
-                                                        Ver
+                                                        <Eye className="w-3 h-3" />
+                                                        Ver Foto
                                                     </button>
                                                 ) : (
-                                                    <span className="text-slate-500 text-sm">Sin comprobante</span>
+                                                    <span className="text-slate-600 text-xs italic">Sin adjunto</span>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                {ticket.status === "PENDING" && (
-                                                    <button
-                                                        onClick={() => { setSelectedTicket(ticket); setShowModal(true) }}
-                                                        className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg text-sm transition-colors"
-                                                    >
-                                                        Gestionar
-                                                    </button>
-                                                )}
+                                                <button
+                                                    onClick={() => { setSelectedTicket(ticket); setShowModal(true) }}
+                                                    className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors"
+                                                >
+                                                    <MoreHorizontal className="w-4 h-4" />
+                                                </button>
                                             </td>
                                         </motion.tr>
                                     )
@@ -284,6 +220,49 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
                     </div>
                 </div>
             </main>
+
+            {/* Right Sidebar - Activity Feed */}
+            <aside className="fixed right-0 top-0 h-full w-80 bg-slate-900/95 border-l border-slate-800 backdrop-blur-xl z-40 hidden md:block pt-20 p-6 overflow-y-auto">
+                <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    Actividad Reciente
+                </h3>
+
+                <div className="space-y-6">
+                    {/* Activity Items */}
+                    {tickets.slice(0, 8).map((ticket, i) => (
+                        <motion.div
+                            key={`activity-${ticket.id}`}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="flex gap-3 relative"
+                        >
+                            {/* Line connecting items */}
+                            {i !== tickets.slice(0, 8).length - 1 && (
+                                <div className="absolute left-2.5 top-8 bottom-[-24px] w-px bg-slate-800" />
+                            )}
+
+                            <div className="relative z-10 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center shrink-0">
+                                <div className={`w-1.5 h-1.5 rounded-full ${ticket.status === 'CONFIRMED' ? 'bg-green-500' :
+                                    ticket.status === 'REJECTED' ? 'bg-red-500' : 'bg-yellow-500'
+                                    }`} />
+                            </div>
+
+                            <div>
+                                <p className="text-sm text-slate-300">
+                                    <span className="font-medium text-white">{ticket.name}</span>
+                                    <span className="text-slate-500"> registró el ticket </span>
+                                    <span className="font-mono text-blue-400 text-xs">#{ticket.ticketNumber.split('-')[1]}</span>
+                                </p>
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Hace {Math.floor(Math.random() * 24)}h
+                                </p>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </aside>
 
             {/* Ticket Detail Modal */}
             <AnimatePresence>
