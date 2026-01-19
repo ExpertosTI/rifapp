@@ -19,8 +19,14 @@ interface SendEmailProps {
 
 export const sendEmail = async ({ to, subject, html }: SendEmailProps) => {
     try {
+        const fromAddress = process.env.SMTP_USER || 'info@renace.space';
+
+        if (!process.env.SMTP_USER) {
+            console.warn("⚠️ SMTP_USER env var is missing, using fallback:", fromAddress);
+        }
+
         const info = await transporter.sendMail({
-            from: process.env.SMTP_USER, // Usar email directo para evitar bloqueos SMTP
+            from: fromAddress,
             to,
             subject,
             html,

@@ -24,12 +24,11 @@ export default async function Home() {
             <Hero config={config} />
 
             {/* Countdown Timer - only show if drawDate is set */}
-            {(config as any)?.drawDate && (
-                <Countdown
-                    targetDate={(config as any).drawDate}
-                    title="El sorteo será en"
-                />
-            )}
+            {/* Countdown Timer */}
+            <Countdown
+                targetDate={(config as any)?.drawDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)}
+                title="El sorteo será en"
+            />
 
             {/* Progress Bar - Ticket Sales */}
             <div className="py-8">
