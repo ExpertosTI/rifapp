@@ -4,6 +4,10 @@ import { TicketGenerator } from "@/components/raffle/TicketGenerator";
 import { TrustBadges } from "@/components/trust/TrustBadges";
 import { Gallery } from "@/components/home/Gallery";
 import { Countdown } from "@/components/home/Countdown";
+import { SocialProof } from "@/components/home/SocialProof";
+import { ProgressBar } from "@/components/home/ProgressBar";
+import { WinnersGallery } from "@/components/home/WinnersGallery";
+import { TrustSection } from "@/components/home/TrustSection";
 
 import { getRaffleConfig } from "@/app/actions/config";
 
@@ -14,6 +18,9 @@ export default async function Home() {
 
     return (
         <main className="flex min-h-screen flex-col bg-slate-950">
+            {/* Social Proof Notifications */}
+            <SocialProof />
+
             <Hero config={config} />
 
             {/* Countdown Timer - only show if drawDate is set */}
@@ -24,13 +31,27 @@ export default async function Home() {
                 />
             )}
 
+            {/* Progress Bar - Ticket Sales */}
+            <div className="py-8">
+                <ProgressBar soldTickets={247} totalTickets={1000} />
+            </div>
+
             <div id="ticket-section">
                 <TicketGenerator config={config} />
             </div>
+
+            {/* Winners Gallery with Testimonials */}
+            <WinnersGallery />
+
             <Gallery />
+
             <div id="amenities-section">
                 <Amenities />
             </div>
+
+            {/* Trust Section with FAQ */}
+            <TrustSection />
+
             <TrustBadges />
 
             {/* Floating verify link */}

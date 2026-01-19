@@ -1,6 +1,4 @@
-"use client"
-
-import { Sparkles, LayoutDashboard, Trophy, Settings, LogOut, Menu, X } from "lucide-react"
+import { Sparkles, LayoutDashboard, Trophy, Settings, LogOut, Menu, X, Tag } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 import Link from "next/link"
@@ -59,8 +57,8 @@ export default function AdminSidebar({ session }: { session: any }) {
                         <Link
                             href="/admin"
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive('/admin')
-                                    ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                                    : 'text-slate-400 hover:bg-slate-800/50'
+                                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                : 'text-slate-400 hover:bg-slate-800/50'
                                 }`}
                         >
                             <LayoutDashboard className="w-5 h-5" />
@@ -69,18 +67,28 @@ export default function AdminSidebar({ session }: { session: any }) {
                         <Link
                             href="/admin/roulette"
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive('/admin/roulette')
-                                    ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                                    : 'text-slate-400 hover:bg-slate-800/50'
+                                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                : 'text-slate-400 hover:bg-slate-800/50'
                                 }`}
                         >
                             <Trophy className="w-5 h-5" />
                             Sorteo
                         </Link>
                         <Link
+                            href="/admin/referrals"
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive('/admin/referrals')
+                                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                : 'text-slate-400 hover:bg-slate-800/50'
+                                }`}
+                        >
+                            <Tag className="w-5 h-5" />
+                            Referidos
+                        </Link>
+                        <Link
                             href="/admin/settings"
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive('/admin/settings')
-                                    ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                                    : 'text-slate-400 hover:bg-slate-800/50'
+                                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                : 'text-slate-400 hover:bg-slate-800/50'
                                 }`}
                         >
                             <Settings className="w-5 h-5" />
