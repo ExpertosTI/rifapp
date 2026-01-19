@@ -11,13 +11,25 @@ export async function getRaffleConfig() {
         return {
             productName: "Gran Premio Exclusivo",
             description: "¡Participa ahora y gana este increíble premio!",
-            ticketPrice: 10.00,
+            ticketPrice: 3.00,
             currency: "USD",
             imageUrl: null,
             isActive: true,
             startDate: new Date(),
             endDate: null,
-            totalTickets: 1000
+            drawDate: null,
+            totalTickets: 1000000,
+            // Payment defaults
+            usdtWallet: null,
+            usdtNetwork: "TRC20",
+            zelleEmail: null,
+            zelleName: null,
+            paypalEmail: null,
+            paypalLink: null,
+            bankName: null,
+            bankAccount: null,
+            bankHolder: null,
+            whatsappNumber: null,
         }
     }
 
@@ -28,35 +40,42 @@ export async function updateRaffleConfig(data: any) {
     try {
         const existing = await prisma.raffleConfig.findFirst()
 
+        const configData = {
+            productName: data.productName,
+            description: data.description,
+            ticketPrice: data.ticketPrice,
+            imageUrl: data.imageUrl || null,
+            isActive: data.isActive,
+            endDate: data.endDate ? new Date(data.endDate) : null,
+            drawDate: data.drawDate ? new Date(data.drawDate) : null,
+            totalTickets: parseInt(data.totalTickets) || 1000000,
+            // Payment methods
+            usdtWallet: data.usdtWallet || null,
+            usdtNetwork: data.usdtNetwork || "TRC20",
+            zelleEmail: data.zelleEmail || null,
+            zelleName: data.zelleName || null,
+            paypalEmail: data.paypalEmail || null,
+            paypalLink: data.paypalLink || null,
+            bankName: data.bankName || null,
+            bankAccount: data.bankAccount || null,
+            bankHolder: data.bankHolder || null,
+            whatsappNumber: data.whatsappNumber || null,
+        }
+
         if (existing) {
             await prisma.raffleConfig.update({
                 where: { id: existing.id },
-                data: {
-                    productName: data.productName,
-                    description: data.description,
-                    ticketPrice: data.ticketPrice,
-                    imageUrl: data.imageUrl,
-                    isActive: data.isActive,
-                    endDate: data.endDate ? new Date(data.endDate) : null,
-                    totalTickets: parseInt(data.totalTickets)
-                }
+                data: configData
             })
         } else {
             await prisma.raffleConfig.create({
-                data: {
-                    productName: data.productName,
-                    description: data.description,
-                    ticketPrice: data.ticketPrice,
-                    imageUrl: data.imageUrl,
-                    isActive: data.isActive || true,
-                    endDate: data.endDate ? new Date(data.endDate) : null,
-                    totalTickets: parseInt(data.totalTickets) || 1000
-                }
+                data: configData
             })
         }
 
         revalidatePath("/")
         revalidatePath("/admin")
+        revalidatePath("/admin/settings")
         return { success: true }
     } catch (error) {
         console.error("Error updating config:", error)

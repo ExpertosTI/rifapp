@@ -21,6 +21,7 @@ interface Props {
 export default function AdminDashboardClient({ session, stats, tickets: initialTickets }: Props) {
     const [tickets, setTickets] = useState(initialTickets)
     const [filter, setFilter] = useState<string>("ALL")
+    const [paymentFilter, setPaymentFilter] = useState<string>("ALL")
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedTicket, setSelectedTicket] = useState<any>(null)
     const [showModal, setShowModal] = useState(false)
@@ -30,10 +31,11 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
 
     const filteredTickets = tickets.filter(ticket => {
         const matchesFilter = filter === "ALL" || ticket.status === filter
+        const matchesPayment = paymentFilter === "ALL" || ticket.paymentMethod === paymentFilter
         const matchesSearch = ticket.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             ticket.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
             ticket.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase())
-        return matchesFilter && matchesSearch
+        return matchesFilter && matchesPayment && matchesSearch
     })
 
     const handleConfirm = async (ticketId: string) => {
@@ -149,6 +151,19 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
                                 </select>
                                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
                             </div>
+                            {/* Payment Method Filter */}
+                            <select
+                                value={paymentFilter}
+                                onChange={(e) => setPaymentFilter(e.target.value)}
+                                className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm focus:outline-none focus:border-blue-500 appearance-none cursor-pointer hover:bg-slate-900 transition-colors"
+                            >
+                                <option value="ALL">💳 Todos los pagos</option>
+                                <option value="USDT">🟢 USDT</option>
+                                <option value="ZELLE">💜 Zelle</option>
+                                <option value="VISA">💳 Visa</option>
+                                <option value="MASTERCARD">🟠 Mastercard</option>
+                                <option value="PAYPAL">💙 PayPal</option>
+                            </select>
                         </div>
                     </div>
 
@@ -159,6 +174,7 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
                                 <tr>
                                     <th className="px-6 py-4 text-left">Ticket</th>
                                     <th className="px-6 py-4 text-left">Participante</th>
+                                    <th className="px-6 py-4 text-left">Pago</th>
                                     <th className="px-6 py-4 text-left">Estado</th>
                                     <th className="px-6 py-4 text-left">Comprobante</th>
                                     <th className="px-6 py-4 text-right">Acciones</th>
@@ -167,6 +183,13 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
                             <tbody className="divide-y divide-slate-800">
                                 {filteredTickets.map((ticket) => {
                                     const StatusIcon = statusIcons[ticket.status] || Clock
+                                    const paymentEmojis: Record<string, string> = {
+                                        USDT: "🟢",
+                                        ZELLE: "💜",
+                                        VISA: "💳",
+                                        MASTERCARD: "🟠",
+                                        PAYPAL: "💙"
+                                    }
                                     return (
                                         <motion.tr
                                             key={ticket.id}
@@ -175,8 +198,8 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
                                             className="hover:bg-blue-500/5 transition-colors group"
                                         >
                                             <td className="px-6 py-4">
-                                                <span className="font-mono text-blue-400 font-medium bg-blue-500/10 px-2 py-1 rounded group-hover:bg-blue-500/20 transition-colors">
-                                                    #{ticket.ticketNumber.split('-')[1]}
+                                                <span className="font-mono text-yellow-400 font-bold text-lg bg-yellow-500/10 px-3 py-1.5 rounded-lg group-hover:bg-yellow-500/20 transition-colors tracking-wider">
+                                                    {ticket.ticketNumber}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
@@ -184,6 +207,15 @@ export default function AdminDashboardClient({ session, stats, tickets: initialT
                                                     <span className="font-medium text-slate-200">{ticket.name}</span>
                                                     <span className="text-xs text-slate-500">{ticket.email}</span>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {ticket.paymentMethod ? (
+                                                    <span className="text-sm">
+                                                        {paymentEmojis[ticket.paymentMethod] || "💰"} {ticket.paymentMethod}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-slate-600 text-xs">N/A</span>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColors[ticket.status]}`}>

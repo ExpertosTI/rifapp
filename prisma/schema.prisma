@@ -20,22 +20,71 @@ model Admin {
 
 model Ticket {
   id            String    @id @default(uuid())
-  ticketNumber  String    @unique
+  ticketNumber  String    @unique // Ahora será "000001" - "999999" (6 dígitos LEIDSA)
   name          String
   email         String
   phone         String
   status        String    @default("PENDING") // PENDING, CONFIRMED, REJECTED, WINNER
   paymentProof  String?   @db.Text // Base64 encoded image
+  paymentMethod String?   // USDT, ZELLE, MASTERCARD, VISA, PAYPAL
   paymentAmount Decimal?  @db.Decimal(10, 2)
+  referralCode  String?   // Código de referido usado
   confirmedBy   String?
   confirmedAt   DateTime?
   rejectedAt    DateTime?
   rejectReason  String?
   isWinner      Boolean   @default(false)
+  raffleId      String?   // Para sistema multi-rifa
+  raffle        Raffle?   @relation(fields: [raffleId], references: [id])
+  winner        Winner?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
 
+// Multi-Rifa Support
+model Raffle {
+  id           String    @id @default(uuid())
+  name         String
+  description  String?   @db.Text
+  prize        String
+  prizeValue   Decimal   @db.Decimal(12, 2)
+  ticketPrice  Decimal   @db.Decimal(10, 2)
+  imageUrl     String?
+  startDate    DateTime  @default(now())
+  endDate      DateTime?
+  drawDate     DateTime?
+  isActive     Boolean   @default(true)
+  totalTickets Int       @default(1000000) // 1 millón para LEIDSA style
+  tickets      Ticket[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// Sistema de Referidos
+model Referral {
+  id              String   @id @default(uuid())
+  code            String   @unique
+  ownerName       String
+  ownerEmail      String
+  discountPercent Int      @default(10)
+  usageCount      Int      @default(0)
+  maxUses         Int?     // null = ilimitado
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+}
+
+// Galería de Ganadores
+model Winner {
+  id          String   @id @default(uuid())
+  ticketId    String   @unique
+  ticket      Ticket   @relation(fields: [ticketId], references: [id])
+  prizePhoto  String?  @db.Text
+  testimonial String?  @db.Text
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+// Configuración de la Rifa (actualizado con métodos de pago)
 model RaffleConfig {
   id          String   @id @default(uuid())
   productName String   @default("Gran Premio")
@@ -46,7 +95,23 @@ model RaffleConfig {
   galleryIds  String[] @default([]) // Array of image URLs or IDs
   startDate   DateTime @default(now())
   endDate     DateTime?
+  drawDate    DateTime? // Fecha del sorteo para countdown
   isActive    Boolean  @default(true)
-  totalTickets Int     @default(1000)
+  totalTickets Int     @default(1000000) // 1 millón
+  
+  // Configuración de Métodos de Pago
+  usdtWallet      String?  // Wallet TRC20 para USDT
+  usdtNetwork     String   @default("TRC20")
+  zelleEmail      String?  // Email para Zelle
+  zelleName       String?  // Nombre del receptor Zelle
+  paypalEmail     String?  // Email PayPal
+  paypalLink      String?  // Link de pago PayPal
+  bankName        String?  // Nombre del banco para tarjetas
+  bankAccount     String?  // Número de cuenta
+  bankHolder      String?  // Titular de la cuenta
+  
+  // WhatsApp para notificaciones
+  whatsappNumber  String?  // +1829XXXXXXX
+  
   updatedAt   DateTime @updatedAt
 }

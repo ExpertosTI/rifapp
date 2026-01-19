@@ -3,6 +3,7 @@ import { Amenities } from "@/components/home/Amenities";
 import { TicketGenerator } from "@/components/raffle/TicketGenerator";
 import { TrustBadges } from "@/components/trust/TrustBadges";
 import { Gallery } from "@/components/home/Gallery";
+import { Countdown } from "@/components/home/Countdown";
 
 import { getRaffleConfig } from "@/app/actions/config";
 
@@ -14,6 +15,15 @@ export default async function Home() {
     return (
         <main className="flex min-h-screen flex-col bg-slate-950">
             <Hero config={config} />
+
+            {/* Countdown Timer - only show if drawDate is set */}
+            {(config as any)?.drawDate && (
+                <Countdown
+                    targetDate={(config as any).drawDate}
+                    title="El sorteo será en"
+                />
+            )}
+
             <div id="ticket-section">
                 <TicketGenerator config={config} />
             </div>
@@ -22,6 +32,14 @@ export default async function Home() {
                 <Amenities />
             </div>
             <TrustBadges />
+
+            {/* Floating verify link */}
+            <a
+                href="/verify"
+                className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-full shadow-lg shadow-blue-500/25 transition-all hover:scale-105"
+            >
+                🔍 Verificar Ticket
+            </a>
         </main>
     );
 }
