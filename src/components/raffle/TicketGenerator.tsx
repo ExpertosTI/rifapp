@@ -223,7 +223,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                 ¡Participa por {config?.productName || "tu Premio"}!
                             </h2>
                             <p className="mb-6 max-w-lg text-base font-light text-white/60 md:mb-10 md:text-lg">
-                                Completa el formulario y adjunta tu comprobante de pago de <span className="text-yellow-400 font-bold">${Number(config?.ticketPrice || 10).toFixed(2)}</span>.
+                                Completa el formulario y adjunta tu comprobante de pago de <span className="text-yellow-400 font-bold">${Number(config?.ticketPrice || 3).toFixed(2)}</span>.
                             </p>
 
                             <AnimatePresence mode="wait">
@@ -268,8 +268,8 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                             type="button"
                                                             onClick={() => setUseCustomNumber(false)}
                                                             className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${!useCustomNumber
-                                                                    ? 'bg-yellow-500 text-black'
-                                                                    : 'bg-white/10 text-white/60 hover:bg-white/20'
+                                                                ? 'bg-yellow-500 text-black'
+                                                                : 'bg-white/10 text-white/60 hover:bg-white/20'
                                                                 }`}
                                                         >
                                                             <Shuffle className="w-3 h-3" /> Aleatorio
@@ -278,8 +278,8 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                             type="button"
                                                             onClick={() => setUseCustomNumber(true)}
                                                             className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${useCustomNumber
-                                                                    ? 'bg-yellow-500 text-black'
-                                                                    : 'bg-white/10 text-white/60 hover:bg-white/20'
+                                                                ? 'bg-yellow-500 text-black'
+                                                                : 'bg-white/10 text-white/60 hover:bg-white/20'
                                                                 }`}
                                                         >
                                                             <Hash className="w-3 h-3" /> Elegir
@@ -296,10 +296,10 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                             placeholder="000000"
                                                             maxLength={6}
                                                             className={`w-full rounded-xl border ${numberAvailable === true
-                                                                    ? 'border-green-500/50 bg-green-500/10'
-                                                                    : numberAvailable === false
-                                                                        ? 'border-red-500/50 bg-red-500/10'
-                                                                        : 'border-white/10 bg-white/5'
+                                                                ? 'border-green-500/50 bg-green-500/10'
+                                                                : numberAvailable === false
+                                                                    ? 'border-red-500/50 bg-red-500/10'
+                                                                    : 'border-white/10 bg-white/5'
                                                                 } px-4 py-3 text-center text-2xl font-mono tracking-[0.5em] text-white placeholder-white/20 transition-all focus:outline-none`}
                                                         />
                                                         {checkingNumber && (
@@ -416,7 +416,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/30 border-t-black" />
                                             ) : (
                                                 <>
-                                                    Participar por ${Number(config?.ticketPrice || 10).toFixed(2)} <Sparkles className="h-5 w-5" />
+                                                    Participar por ${Number(config?.ticketPrice || 3).toFixed(2)} <Sparkles className="h-5 w-5" />
                                                 </>
                                             )}
                                         </motion.button>
