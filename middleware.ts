@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyAuth } from '@/lib/auth';
+import { verifyToken } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -20,7 +20,9 @@ export async function middleware(request: NextRequest) {
             return response;
         }
 
-        const verified = await verifyAuth(request);
+        const token = request.cookies.get('admin_token')?.value;
+        const verified = token ? await verifyToken(token) : null;
+
         if (!verified) {
             return NextResponse.redirect(new URL('/admin/login', request.url));
         }
