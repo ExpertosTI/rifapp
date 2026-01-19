@@ -8,7 +8,7 @@ import { PaymentMethods } from "./PaymentMethods";
 import { TermsModal } from "./TermsModal";
 
 export const TicketGenerator = ({ config }: { config?: any }) => {
-    const [ticket, setTicket] = useState<string | null>(null);
+    const [tickets, setTickets] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -23,6 +23,11 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
     const [useCustomNumber, setUseCustomNumber] = useState(false);
     const [checkingNumber, setCheckingNumber] = useState(false);
     const [numberAvailable, setNumberAvailable] = useState<boolean | null>(null);
+
+    // Cantidad de tickets
+    const [quantity, setQuantity] = useState(1);
+
+    const ticketPrice = Number(config?.ticketPrice || 3);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -72,9 +77,18 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
         const value = e.target.value.replace(/\D/g, "").slice(0, 6);
         setCustomNumber(value);
         setNumberAvailable(null);
+        setQuantity(1); // Force quantity to 1 when choosing custom number
 
         if (value.length === 6) {
             checkNumber(value);
+        }
+    };
+
+    const handleQuantityChange = (delta: number) => {
+        if (useCustomNumber) return; // Cannot change quantity in custom mode
+        const newQty = quantity + delta;
+        if (newQty >= 1 && newQty <= 100) {
+            setQuantity(newQty);
         }
     };
 
@@ -150,14 +164,20 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
         const formData = new FormData(e.currentTarget);
         formData.set('paymentProof', paymentProof);
         formData.set('paymentMethod', paymentMethod);
+        formData.set('quantity', quantity.toString());
+
         if (useCustomNumber && customNumber) {
             formData.set('customNumber', customNumber);
         }
 
-        const result = await generateTicketAction(formData);
+        const result: any = await generateTicketAction(formData);
 
-        if (result.success && result.ticket) {
-            setTicket(result.ticket);
+        if (result.success && result.tickets) {
+            setTickets(result.tickets);
+            fireConfetti();
+        } else if (result.ticket) {
+            // Fallback for single ticket legacy response support
+            setTickets([result.ticket]);
             fireConfetti();
         } else {
             setError(result.error || "Algo salió mal. Intenta de nuevo.");
@@ -165,22 +185,21 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
         setLoading(false);
     };
 
-    const copyToClipboard = () => {
-        if (ticket) {
-            navigator.clipboard.writeText(ticket);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        }
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     const resetForm = () => {
-        setTicket(null);
+        setTickets([]);
         setPaymentProof(null);
         setFileName(null);
         setPaymentMethod("");
         setCustomNumber("");
         setUseCustomNumber(false);
         setNumberAvailable(null);
+        setQuantity(1);
     };
 
     const handleTermsAccept = () => {
@@ -223,11 +242,11 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                 ¡Participa por {config?.productName || "tu Premio"}!
                             </h2>
                             <p className="mb-6 max-w-lg text-base font-light text-white/60 md:mb-10 md:text-lg">
-                                Completa el formulario y adjunta tu comprobante de pago de <span className="text-yellow-400 font-bold">${Number(config?.ticketPrice || 3).toFixed(2)}</span>.
+                                Completa el formulario y adjunta tu comprobante de pago de <span className="text-yellow-400 font-bold">${Number(config?.ticketPrice || 3).toFixed(2)}</span> por ticket.
                             </p>
 
                             <AnimatePresence mode="wait">
-                                {!ticket ? (
+                                {tickets.length === 0 ? (
                                     <motion.form
                                         key="form"
                                         onSubmit={handleSubmit}
@@ -259,14 +278,16 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                 className="w-full rounded-xl md:rounded-2xl border border-white/10 bg-white/5 px-4 py-3 md:px-6 md:py-4 text-base md:text-lg text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-white/30 focus:bg-white/10 focus:outline-none"
                                             />
 
-                                            {/* Número de Ticket - Elegir o Aleatorio */}
-                                            <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+                                            {/* Configuración de Tickets */}
+                                            <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-4">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-sm text-white/60">Tu número de la suerte</span>
+                                                    <span className="text-sm text-white/60">Modo de Selección</span>
                                                     <div className="flex gap-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => setUseCustomNumber(false)}
+                                                            onClick={() => {
+                                                                setUseCustomNumber(false);
+                                                            }}
                                                             className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${!useCustomNumber
                                                                 ? 'bg-yellow-500 text-black'
                                                                 : 'bg-white/10 text-white/60 hover:bg-white/20'
@@ -276,7 +297,10 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                         </button>
                                                         <button
                                                             type="button"
-                                                            onClick={() => setUseCustomNumber(true)}
+                                                            onClick={() => {
+                                                                setUseCustomNumber(true);
+                                                                setQuantity(1);
+                                                            }}
                                                             className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${useCustomNumber
                                                                 ? 'bg-yellow-500 text-black'
                                                                 : 'bg-white/10 text-white/60 hover:bg-white/20'
@@ -287,7 +311,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                     </div>
                                                 </div>
 
-                                                {useCustomNumber && (
+                                                {useCustomNumber ? (
                                                     <div className="relative">
                                                         <input
                                                             type="text"
@@ -318,13 +342,35 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                             </p>
                                                         )}
                                                     </div>
+                                                ) : (
+                                                    <div className="flex items-center justify-between bg-white/5 rounded-xl p-3 border border-white/10">
+                                                        <span className="text-sm text-white/60">Cantidad de Tickets</span>
+                                                        <div className="flex items-center gap-3">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleQuantityChange(-1)}
+                                                                disabled={quantity <= 1}
+                                                                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                            >
+                                                                -
+                                                            </button>
+                                                            <span className="text-xl font-bold text-white w-8 text-center">{quantity}</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleQuantityChange(1)}
+                                                                disabled={quantity >= 100}
+                                                                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                            >
+                                                                +
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 )}
 
-                                                {!useCustomNumber && (
-                                                    <p className="text-xs text-white/40 text-center">
-                                                        Se asignará un número aleatorio entre 000000 y 999999
-                                                    </p>
-                                                )}
+                                                <div className="flex justify-between items-center pt-2 border-t border-white/5">
+                                                    <span className="text-white/60">Total a Pagar:</span>
+                                                    <span className="text-xl font-bold text-yellow-400">${(quantity * ticketPrice).toFixed(2)}</span>
+                                                </div>
                                             </div>
 
                                             {/* Payment Methods */}
@@ -416,7 +462,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/30 border-t-black" />
                                             ) : (
                                                 <>
-                                                    Participar por ${Number(config?.ticketPrice || 3).toFixed(2)} <Sparkles className="h-5 w-5" />
+                                                    Participar ({quantity} Ticket{quantity > 1 ? 's' : ''}) <Sparkles className="h-5 w-5" />
                                                 </>
                                             )}
                                         </motion.button>
@@ -443,44 +489,48 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                         </motion.div>
 
                                         <div className="text-center">
-                                            <h3 className="text-2xl font-bold text-white mb-2">¡Ticket Registrado!</h3>
+                                            <h3 className="text-2xl font-bold text-white mb-2">¡{tickets.length} Ticket{tickets.length > 1 ? 's' : ''} Registrado{tickets.length > 1 ? 's' : ''}!</h3>
                                             <p className="text-white/60">Pendiente de confirmación de pago</p>
                                         </div>
 
-                                        <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 px-8 py-10 shadow-2xl backdrop-blur-md">
-                                            <div className="absolute top-0 right-0 p-6 opacity-20">
-                                                <TicketIcon className="h-24 w-24 text-yellow-400" />
-                                            </div>
+                                        <div className="w-full max-h-[300px] overflow-y-auto space-y-4 pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                            {tickets.map((ticketNum, index) => (
+                                                <div key={ticketNum} className="relative w-full max-w-sm mx-auto overflow-hidden rounded-3xl border border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 px-8 py-6 shadow-2xl backdrop-blur-md">
+                                                    <div className="absolute top-0 right-0 p-4 opacity-20">
+                                                        <TicketIcon className="h-12 w-12 text-yellow-400" />
+                                                    </div>
 
-                                            <div className="relative z-10">
-                                                <div className="text-xs font-bold uppercase tracking-[0.2em] text-yellow-400/70">Tu Número de Ticket</div>
-                                                <div className="mt-2 text-5xl font-bold tracking-[0.3em] text-white drop-shadow-lg font-mono">
-                                                    {ticket}
+                                                    <div className="relative z-10 text-center">
+                                                        <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-yellow-400/70">Ticket #{index + 1}</div>
+                                                        <div className="mt-1 text-4xl font-bold tracking-[0.2em] text-white drop-shadow-lg font-mono">
+                                                            {ticketNum}
+                                                        </div>
+                                                        <button
+                                                            onClick={() => copyToClipboard(ticketNum)}
+                                                            className="mt-3 flex items-center justify-center gap-2 mx-auto text-xs text-white/50 hover:text-white transition-colors"
+                                                        >
+                                                            {copied ? "Copiado" : "Copiar"} <Copy className="w-3 h-3" />
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div className="mt-6 flex items-center gap-2">
-                                                    <div className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
-                                                    <span className="text-sm font-medium text-yellow-400">Pendiente de Verificación</span>
-                                                </div>
-                                                <p className="mt-4 text-xs text-white/50">
-                                                    Recibirás un email y WhatsApp cuando tu ticket sea confirmado.
-                                                </p>
-                                            </div>
+                                            ))}
                                         </div>
 
-                                        <div className="flex flex-col gap-3">
-                                            <button
-                                                onClick={copyToClipboard}
-                                                className="flex items-center gap-2 rounded-full bg-white/10 px-6 py-3 text-sm font-medium text-white transition-all hover:bg-white/20"
-                                            >
-                                                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                                                {copied ? "Copiado" : "Copiar Número"}
-                                            </button>
+                                        <div className="flex flex-col gap-3 w-full max-w-xs">
+                                            <div className="flex items-center justify-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10">
+                                                <div className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
+                                                <span className="text-sm font-medium text-yellow-400">Pendiente de Verificación</span>
+                                            </div>
+
+                                            <p className="text-xs text-white/50 text-center px-4">
+                                                Recibirás un email y WhatsApp cuando tus tickets sean confirmados.
+                                            </p>
 
                                             <button
                                                 onClick={resetForm}
-                                                className="text-xs text-white/40 hover:text-white transition-colors"
+                                                className="mt-4 text-xs text-white/40 hover:text-white transition-colors"
                                             >
-                                                Registrar Otro Ticket
+                                                Registrar Más Tickets
                                             </button>
                                         </div>
                                     </motion.div>

@@ -57,6 +57,15 @@ export async function generateTicketAction(formData: FormData) {
   const paymentProof = formData.get("paymentProof") as string | null;
   const paymentMethod = formData.get("paymentMethod") as string | null;
   const customNumber = formData.get("customNumber") as string | null;
+  // Parse quantity, default to 1, max 100 for safety
+  let quantity = parseInt(formData.get("quantity") as string) || 1;
+  if (quantity < 1) quantity = 1;
+  if (quantity > 100) quantity = 100;
+
+  // If custom number is set, force quantity to 1
+  if (customNumber) {
+    quantity = 1;
+  }
 
   const result = schema.safeParse(data);
 
@@ -68,64 +77,82 @@ export async function generateTicketAction(formData: FormData) {
     return { error: "Debes seleccionar un método de pago." };
   }
 
-  // Generate or validate ticket number
-  let ticketNumber: string;
+  const createdTickets: string[] = [];
+  const errors: string[] = [];
 
-  if (customNumber && /^\d{6}$/.test(customNumber)) {
-    // User chose a custom number - verify it's available
-    const availability = await checkTicketAvailability(customNumber);
-    if (!availability.available) {
-      return { error: "Este número ya está ocupado. Elige otro." };
+  // Loop to generate tickets
+  for (let i = 0; i < quantity; i++) {
+    let ticketNumber: string;
+
+    if (customNumber && /^\d{6}$/.test(customNumber)) {
+      // User chose a custom number - verify it's available
+      const availability = await checkTicketAvailability(customNumber);
+      if (!availability.available) {
+        return { error: "Este número ya está ocupado. Elige otro." };
+      }
+      ticketNumber = customNumber;
+    } else {
+      // Generate random number
+      try {
+        ticketNumber = await generateUniqueTicketNumber();
+      } catch (err) {
+        errors.push("Error generando un número aleatorio.");
+        continue; // Skip this one
+      }
     }
-    ticketNumber = customNumber;
-  } else {
-    // Generate random number
+
+    // Save to Database
     try {
-      ticketNumber = await generateUniqueTicketNumber();
-    } catch (err) {
-      return { error: "Error generando número. Intenta de nuevo." };
+      await prisma.ticket.create({
+        data: {
+          ticketNumber,
+          name: result.data.name,
+          email: result.data.email,
+          phone: result.data.phone,
+          status: "PENDING",
+          paymentProof: paymentProof || null,
+          paymentMethod: paymentMethod,
+        }
+      });
+      createdTickets.push(ticketNumber);
+    } catch (dbError) {
+      console.error("Database error creating ticket:", dbError);
+      errors.push("Error guardando ticket en base de datos.");
     }
   }
 
-  // Step 1: Save to Database
-  try {
-    await prisma.ticket.create({
-      data: {
-        ticketNumber,
-        name: result.data.name,
-        email: result.data.email,
-        phone: result.data.phone,
-        status: "PENDING",
-        paymentProof: paymentProof || null,
-        paymentMethod: paymentMethod,
-      }
-    });
-  } catch (dbError) {
-    console.error("Database error creating ticket:", dbError);
-    return { error: "Error al guardar el ticket en la base de datos." };
+  if (createdTickets.length === 0) {
+    return { error: errors[0] || "No se pudo generar ningún ticket. Intenta de nuevo." };
   }
 
   // Fetch config for email details
   const config = await prisma.raffleConfig.findFirst();
   const productName = config?.productName || "Rifasmax";
 
-  // Step 2: Try to send email (non-blocking - ticket is already saved)
+  // Generate HTML for ticket list
+  const ticketsHtml = createdTickets.map(num => `
+    <div style="background: rgba(255,255,255,0.1); padding: 20px 10px; border-radius: 12px; text-align: center; margin: 10px 0; border: 2px dashed #fbbf24; display: inline-block; min-width: 150px; margin: 5px;">
+      <h2 style="color: #fbbf24; font-size: 32px; margin: 0; letter-spacing: 4px; font-family: monospace;">${num}</h2>
+    </div>
+  `).join('');
+
+  // Step 2: Try to send email (non-blocking)
   try {
     await sendEmail({
       to: result.data.email,
-      subject: `🎟️ Tu Ticket #${ticketNumber} para ${productName} - Pendiente de Confirmación`,
+      subject: `🎟️ Tus Tickets para ${productName} - Pendiente de Confirmación`,
       html: `
           <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 40px; border-radius: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
               <img src="https://rifasmax.com/logo-rifasmax.png" alt="Rifasmax" style="height: 60px;" />
             </div>
             <h1 style="color: #fff; text-align: center; margin: 0;">🎉 ¡Hola ${result.data.name}!</h1>
-            <p style="color: #ccc; text-align: center; font-size: 18px; margin-top: 10px;">Tu ticket para <strong>${productName}</strong> ha sido registrado exitosamente.</p>
+            <p style="color: #ccc; text-align: center; font-size: 18px; margin-top: 10px;">Hemos registrado <strong>${createdTickets.length} ticket(s)</strong> exitosamente.</p>
             
-            <div style="background: rgba(255,255,255,0.1); padding: 40px 30px; border-radius: 20px; text-align: center; margin: 30px 0; border: 2px dashed #fbbf24;">
-              <p style="color: #9ca3af; margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 3px;">Tu Número de Ticket</p>
-              <h2 style="color: #fbbf24; font-size: 56px; margin: 15px 0; letter-spacing: 8px; font-family: monospace;">${ticketNumber}</h2>
-              <p style="color: #fbbf24; margin: 0; font-size: 14px;">⏳ Pendiente de Confirmación</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <p style="color: #9ca3af; margin-bottom: 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 3px;">Tus Números</p>
+              ${ticketsHtml}
+              <p style="color: #fbbf24; margin-top: 15px; font-size: 14px;">⏳ Pendiente de Confirmación</p>
             </div>
             
             <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
@@ -134,7 +161,7 @@ export async function generateTicketAction(formData: FormData) {
               </p>
             </div>
             
-            <p style="color: #9ca3af; text-align: center; font-size: 14px;">Tu pago está siendo verificado. Recibirás otro email cuando tu ticket sea confirmado.</p>
+            <p style="color: #9ca3af; text-align: center; font-size: 14px;">Tu pago está siendo verificado. Recibirás otro email cuando tus tickets sean confirmados.</p>
             <p style="color: #9ca3af; text-align: center; font-size: 14px;">¡Gracias por participar y buena suerte! 🍀</p>
             
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
@@ -144,9 +171,9 @@ export async function generateTicketAction(formData: FormData) {
         `,
     });
   } catch (emailError) {
-    // Email failed but ticket was saved - log but don't fail
-    console.error("Email notification failed (ticket was saved):", emailError);
+    console.error("Email notification failed:", emailError);
   }
 
-  return { success: true, ticket: ticketNumber };
+  // Return list of tickets
+  return { success: true, tickets: createdTickets };
 }

@@ -25,10 +25,10 @@ export const TermsModal = ({ isOpen, onClose, onAccept }: TermsModalProps) => {
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="relative w-full max-w-lg max-h-[85vh] overflow-hidden rounded-3xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl"
+                        className="relative w-[95%] max-w-lg max-h-[85vh] overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl"
                     >
                         {/* Header */}
-                        <div className="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-white/10 bg-slate-900/95 backdrop-blur-xl">
+                        <div className="sticky top-0 z-10 flex items-center justify-between p-4 md:p-6 border-b border-white/10 bg-slate-900/95 backdrop-blur-xl">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center">
                                     <FileText className="w-5 h-5 text-yellow-400" />
@@ -112,7 +112,7 @@ export const TermsModal = ({ isOpen, onClose, onAccept }: TermsModalProps) => {
                         </div>
 
                         {/* Footer */}
-                        <div className="sticky bottom-0 p-6 border-t border-white/10 bg-slate-900/95 backdrop-blur-xl">
+                        <div className="sticky bottom-0 p-4 md:p-6 border-t border-white/10 bg-slate-900/95 backdrop-blur-xl">
                             <motion.button
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}

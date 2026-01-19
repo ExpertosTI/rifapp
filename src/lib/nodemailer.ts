@@ -20,7 +20,7 @@ interface SendEmailProps {
 export const sendEmail = async ({ to, subject, html }: SendEmailProps) => {
     try {
         const info = await transporter.sendMail({
-            from: '"Rifa Inmobiliaria" <noreply@rifapp.com>',
+            from: `"Rifasmax" <${process.env.SMTP_USER || 'info@renace.space'}>`,
             to,
             subject,
             html,
