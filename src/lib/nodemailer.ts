@@ -20,7 +20,7 @@ interface SendEmailProps {
 export const sendEmail = async ({ to, subject, html }: SendEmailProps) => {
     try {
         const info = await transporter.sendMail({
-            from: `"Rifasmax" <${process.env.SMTP_USER || 'info@renace.space'}>`,
+            from: process.env.SMTP_USER, // Usar email directo para evitar bloqueos SMTP
             to,
             subject,
             html,

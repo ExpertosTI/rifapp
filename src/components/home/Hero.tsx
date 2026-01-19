@@ -74,33 +74,7 @@ export const Hero = ({ config }: { config: any }) => {
                     </p>
                 </motion.div>
 
-                {/* Progress Bar / Urgency */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.6 }}
-                    className="w-full max-w-md bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-4 mt-4"
-                >
-                    <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-yellow-400">
-                            <Ticket className="w-3 h-3" />
-                            <span>Tickets Vendidos</span>
-                        </div>
-                        <span className="text-xs font-mono text-white/60">{sold} / {total}</span>
-                    </div>
-                    <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden mb-2">
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${percentage}%` }}
-                            transition={{ duration: 1.5, ease: "easeOut" }}
-                            className="h-full bg-gradient-to-r from-yellow-400 to-orange-500"
-                        />
-                    </div>
-                    <div className="flex justify-between text-[10px] text-white/30 uppercase tracking-widest">
-                        <span>Quedan pocos lugares</span>
-                        <span>{percentage}% Completado</span>
-                    </div>
-                </motion.div>
+
 
                 {/* Social Proof (Fake) */}
                 <motion.div

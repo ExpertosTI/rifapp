@@ -25,7 +25,7 @@ export const TermsModal = ({ isOpen, onClose, onAccept }: TermsModalProps) => {
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 50 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="relative w-full md:w-[95%] md:max-w-lg max-h-[90vh] md:max-h-[85vh] overflow-hidden rounded-t-3xl md:rounded-2xl border border-white/10 bg-slate-900 md:bg-slate-900/95 backdrop-blur-xl shadow-2xl flex flex-col"
+                        className="relative w-full md:w-[95%] md:max-w-lg h-[85vh] md:h-auto md:max-h-[85vh] overflow-hidden rounded-t-3xl md:rounded-2xl border-t md:border border-white/10 bg-slate-900 md:bg-slate-900/95 backdrop-blur-xl shadow-2xl flex flex-col"
                     >
                         {/* Header */}
                         <div className="flex-shrink-0 flex items-center justify-between p-4 md:p-6 border-b border-white/10 bg-slate-900">
@@ -108,6 +108,7 @@ export const TermsModal = ({ isOpen, onClose, onAccept }: TermsModalProps) => {
                                         leído, entendido y aceptado todos estos términos y condiciones.
                                     </TermItem>
                                 </div>
+                                <div className="h-20 md:hidden"></div> {/* Spacer for mobile */}
                             </div>
                         </div>
 
