@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Ticket, Target, TrendingUp } from "lucide-react";
+import { Ticket, Target, TrendingUp, Download } from "lucide-react";
 
 interface ProgressBarProps {
     soldTickets?: number;

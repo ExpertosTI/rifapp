@@ -43,6 +43,16 @@ const PaypalIcon = () => (
     </svg>
 );
 
+const GooglePayIcon = () => (
+    <svg viewBox="0 0 32 32" className="w-6 h-6">
+        <rect width="32" height="32" rx="4" fill="#fff" />
+        <path fill="#4285F4" d="M20.2 16.5c0-.4-.1-.8-.1-1.2H14.2v2.4h3.4c-.1.7-.6 1.4-1.2 1.8v1.5h1.9c1.1-1.1 1.8-2.6 1.8-4.5z" />
+        <path fill="#34A853" d="M14.2 21.6c1.7 0 3.1-.6 4.1-1.5l-1.9-1.5c-.6.4-1.3.6-2.2.6-1.7 0-3.1-1.1-3.6-2.6H8.6v1.5c1 2.1 3.1 3.5 5.6 3.5z" />
+        <path fill="#FBBC05" d="M10.6 16.6c-.1-.4-.2-.8-.2-1.2s.1-.8.2-1.2v-1.5H8.6C8.3 13.5 8.2 14.4 8.2 15.4s.1 1.9.4 2.8l2-1.6z" />
+        <path fill="#EA4335" d="M14.2 11.2c.9 0 1.7.3 2.4.9l1.8-1.8C17.3 9.3 15.9 8.7 14.2 8.7c-2.5 0-4.6 1.4-5.6 3.3l2 1.5c.5-1.5 1.9-2.3 3.6-2.3z" />
+    </svg>
+);
+
 interface PaymentMethodsProps {
     config?: any;
     selected: string;
@@ -90,6 +100,14 @@ const paymentMethods = [
         borderColor: "border-blue-600/30",
         description: "Pago en línea"
     },
+    {
+        id: "GOOGLEPAY",
+        name: "Google Pay",
+        icon: GooglePayIcon,
+        color: "from-red-500/20 to-red-600/20",
+        borderColor: "border-red-500/30",
+        description: "Pago móvil"
+    },
 ];
 
 export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsProps) => {
@@ -112,6 +130,10 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                     email: config?.paypalEmail || "pagos@rifasmax.com",
                     link: config?.paypalLink,
                 };
+            case "GOOGLEPAY":
+                return {
+                    number: config?.googlePayNumber || "",
+                };
             case "VISA":
             case "MASTERCARD":
                 return {
@@ -127,7 +149,7 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
     return (
         <div className="space-y-2">
             <label className="text-sm text-white/60 font-medium">Método de Pago</label>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-6 gap-2">
                 {paymentMethods.map((method) => (
                     <motion.button
                         key={method.id}
@@ -267,6 +289,23 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                                     )}
                                     <p className="text-[10px] text-blue-400/70">
                                         💰 Envía como "Amigos y Familiares" para evitar comisiones.
+                                    </p>
+                                </div>
+                            )}
+
+                            {selected === "GOOGLEPAY" && (
+                                <div className="space-y-2">
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={getPaymentDetails("GOOGLEPAY").number}
+                                            readOnly
+                                            className="w-full bg-black/30 rounded-lg px-3 py-2 text-xs font-mono text-white/80 pr-10"
+                                        />
+                                        <CopyButton text={getPaymentDetails("GOOGLEPAY").number || ""} />
+                                    </div>
+                                    <p className="text-[10px] text-red-400/70">
+                                        📱 Agrega este correo / número en tu app de Google Pay para enviar.
                                     </p>
                                 </div>
                             )}

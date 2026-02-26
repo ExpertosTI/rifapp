@@ -29,6 +29,7 @@ export async function getRaffleConfig() {
             bankName: null,
             bankAccount: null,
             bankHolder: null,
+            googlePayNumber: null,
             whatsappNumber: null,
         }
     }
@@ -59,6 +60,7 @@ export async function updateRaffleConfig(data: any) {
             bankName: data.bankName || null,
             bankAccount: data.bankAccount || null,
             bankHolder: data.bankHolder || null,
+            googlePayNumber: data.googlePayNumber || null,
             whatsappNumber: data.whatsappNumber || null,
         }
 

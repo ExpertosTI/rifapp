@@ -109,6 +109,7 @@ model RaffleConfig {
   bankName        String?  // Nombre del banco para tarjetas
   bankAccount     String?  // Número de cuenta
   bankHolder      String?  // Titular de la cuenta
+  googlePayNumber String?  // Número o Link de Google Pay
   
   // WhatsApp para notificaciones
   whatsappNumber  String?  // +1829XXXXXXX

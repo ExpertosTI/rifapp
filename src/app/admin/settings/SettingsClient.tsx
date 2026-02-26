@@ -30,6 +30,7 @@ interface Config {
     bankName: string | null
     bankAccount: string | null
     bankHolder: string | null
+    googlePayNumber: string | null
     whatsappNumber: string | null
 }
 
@@ -49,6 +50,7 @@ export default function SettingsClient({ initialConfig }: { initialConfig: any }
         bankName: initialConfig.bankName || "",
         bankAccount: initialConfig.bankAccount || "",
         bankHolder: initialConfig.bankHolder || "",
+        googlePayNumber: initialConfig.googlePayNumber || "",
         whatsappNumber: initialConfig.whatsappNumber || "",
     })
     const [loading, setLoading] = useState(false)
@@ -88,8 +90,8 @@ export default function SettingsClient({ initialConfig }: { initialConfig: any }
                     <button
                         onClick={() => setActiveTab('general')}
                         className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${activeTab === 'general'
-                                ? 'bg-blue-600 text-white'
-                                : 'text-slate-400 hover:text-white'
+                            ? 'bg-blue-600 text-white'
+                            : 'text-slate-400 hover:text-white'
                             }`}
                     >
                         ⚙️ General
@@ -97,8 +99,8 @@ export default function SettingsClient({ initialConfig }: { initialConfig: any }
                     <button
                         onClick={() => setActiveTab('payments')}
                         className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${activeTab === 'payments'
-                                ? 'bg-blue-600 text-white'
-                                : 'text-slate-400 hover:text-white'
+                            ? 'bg-blue-600 text-white'
+                            : 'text-slate-400 hover:text-white'
                             }`}
                     >
                         💳 Métodos de Pago
@@ -347,6 +349,23 @@ export default function SettingsClient({ initialConfig }: { initialConfig: any }
                             </div>
                         </div>
 
+                        {/* Google Pay */}
+                        <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-xl space-y-3">
+                            <h3 className="font-semibold text-red-400 flex items-center gap-2">
+                                <span className="text-lg">📱</span> Google Pay
+                            </h3>
+                            <div>
+                                <label className="block text-xs text-slate-400 mb-1">Número / Email Google Pay</label>
+                                <input
+                                    type="text"
+                                    value={config.googlePayNumber || ''}
+                                    onChange={(e) => handleChange('googlePayNumber', e.target.value)}
+                                    placeholder="ejemplo@gmail.com o +1..."
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-red-500"
+                                />
+                            </div>
+                        </div>
+
                         {/* WhatsApp */}
                         <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl space-y-3">
                             <h3 className="font-semibold text-emerald-400 flex items-center gap-2">
@@ -468,6 +487,9 @@ export default function SettingsClient({ initialConfig }: { initialConfig: any }
                             )}
                             {config.whatsappNumber && (
                                 <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-medium">✓ WhatsApp</span>
+                            )}
+                            {config.googlePayNumber && (
+                                <span className="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-medium">✓ Google Pay</span>
                             )}
                         </div>
                     </div>

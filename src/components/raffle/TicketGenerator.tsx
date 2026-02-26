@@ -31,11 +31,22 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Check localStorage for terms acceptance
+    // Check localStorage for terms acceptance and URL params for quantity
     useEffect(() => {
         const accepted = localStorage.getItem("rifasmax_terms_accepted");
         if (accepted === "true") {
             setTermsAccepted(true);
+        }
+
+        // Un único link para las cantidades
+        const params = new URLSearchParams(window.location.search);
+        const qtyParam = params.get("qty");
+        if (qtyParam) {
+            const parsed = parseInt(qtyParam);
+            if (!isNaN(parsed) && parsed >= 1 && parsed <= 100) {
+                setQuantity(parsed);
+                setUseCustomNumber(false);
+            }
         }
     }, []);
 
