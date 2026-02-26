@@ -14,19 +14,30 @@ import { getRaffleConfig } from "@/app/actions/config";
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-    const config = await getRaffleConfig();
+    let config = null;
+    try {
+        config = await getRaffleConfig();
+    } catch (e) {
+        console.error("Failed to fetch raffle config:", e);
+    }
+
+    const safeConfig = config || {};
 
     return (
         <main className="flex min-h-screen flex-col bg-slate-950">
             {/* Social Proof Notifications */}
             <SocialProof />
 
-            <Hero config={config} />
+            <Hero config={safeConfig} />
 
             {/* Countdown Timer - only show if drawDate is set */}
             {/* Countdown Timer */}
             <Countdown
-                targetDate={(config as any)?.drawDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)}
+                targetDate={
+                    (safeConfig as any)?.drawDate
+                        ? new Date((safeConfig as any).drawDate).toISOString()
+                        : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                }
                 title="El sorteo será en"
             />
 
@@ -36,7 +47,7 @@ export default async function Home() {
             </div>
 
             <div id="ticket-section">
-                <TicketGenerator config={config} />
+                <TicketGenerator config={safeConfig} />
             </div>
 
             {/* Winners Gallery with Testimonials */}

@@ -8,6 +8,7 @@ interface SplitTextProps {
 }
 
 export const SplitText = ({ text, className = "", delay = 0 }: SplitTextProps) => {
+    if (!text) return null;
     const letters = text.split("");
 
     const container = {

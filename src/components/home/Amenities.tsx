@@ -125,13 +125,12 @@ export const Amenities = () => {
                                     className="absolute inset-0 bg-white/20"
                                     animate={{
                                         opacity: [0, 0.5, 0],
-                                        scale: [1, 1.5, 1]
+                                        scale: [1, 1.2, 1]
                                     }}
                                     transition={{
                                         duration: 3,
                                         repeat: Infinity,
-                                        ease: "easeInOut",
-                                        delay: i * 0.2
+                                        ease: "linear",
                                     }}
                                 />
                                 <item.icon size={24} strokeWidth={1.8} className="relative z-10" />
