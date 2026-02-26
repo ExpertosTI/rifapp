@@ -31,7 +31,7 @@ export const Navbar = () => {
 
             <div className="hidden items-center gap-8 md:flex">
                 <button onClick={() => document.getElementById('amenities-section')?.scrollIntoView({ behavior: 'smooth' })} className="text-xs font-bold uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors">
-                    Amenidades
+                    Premios
                 </button>
                 <button onClick={() => document.getElementById('ticket-section')?.scrollIntoView({ behavior: 'smooth' })} className="rounded-full bg-white px-6 py-3 text-xs font-bold uppercase tracking-widest text-black transition-transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                     Comprar Ticket

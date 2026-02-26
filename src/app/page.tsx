@@ -1,12 +1,9 @@
 import { Hero } from "@/components/home/Hero";
 import { Amenities } from "@/components/home/Amenities";
 import { TicketGenerator } from "@/components/raffle/TicketGenerator";
-import { TrustBadges } from "@/components/trust/TrustBadges";
-import { Gallery } from "@/components/home/Gallery";
 import { Countdown } from "@/components/home/Countdown";
 import { SocialProof } from "@/components/home/SocialProof";
 import { ProgressBar } from "@/components/home/ProgressBar";
-import { WinnersGallery } from "@/components/home/WinnersGallery";
 import { TrustSection } from "@/components/home/TrustSection";
 
 import { getRaffleConfig } from "@/app/actions/config";
@@ -30,7 +27,6 @@ export default async function Home() {
 
             <Hero config={safeConfig} />
 
-            {/* Countdown Timer - only show if drawDate is set */}
             {/* Countdown Timer */}
             <Countdown
                 targetDate={
@@ -42,7 +38,7 @@ export default async function Home() {
             />
 
             {/* Progress Bar - Ticket Sales */}
-            <div className="py-8">
+            <div className="py-6">
                 <ProgressBar soldTickets={247} totalTickets={1000} />
             </div>
 
@@ -50,19 +46,13 @@ export default async function Home() {
                 <TicketGenerator config={safeConfig} />
             </div>
 
-            {/* Winners Gallery with Testimonials */}
-            <WinnersGallery />
-
-            <Gallery />
-
+            {/* Premios - Vehículos */}
             <div id="amenities-section">
                 <Amenities />
             </div>
 
-            {/* Trust Section with FAQ */}
+            {/* FAQ + Trust Badges */}
             <TrustSection />
-
-            <TrustBadges />
 
             {/* Floating verify link */}
             <a
