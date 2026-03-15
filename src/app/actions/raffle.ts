@@ -10,6 +10,38 @@ const schema = z.object({
   phone: z.string().min(10),
 });
 
+function normalizePhone(phone: string) {
+  return phone.replace(/\D/g, "");
+}
+
+function buildVerificationLink(phone: string) {
+  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.APP_URL || "https://rifasmax.com").replace(/\/$/, "");
+  return `${baseUrl}/verify?phone=${phone}`;
+}
+
+function parseCustomNumbers(rawValue: string | null) {
+  if (!rawValue) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(rawValue);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return Array.from(
+      new Set(
+        parsed
+          .map((value) => String(value).replace(/\D/g, "").slice(0, 6))
+          .filter((value) => /^\d{6}$/.test(value))
+      )
+    );
+  } catch {
+    return [];
+  }
+}
+
 // Generate a unique 6-digit LEIDSA-style ticket number
 async function generateUniqueTicketNumber(): Promise<string> {
   const maxAttempts = 100;
@@ -57,15 +89,11 @@ export async function generateTicketAction(formData: FormData) {
   const paymentProof = formData.get("paymentProof") as string | null;
   const paymentMethod = formData.get("paymentMethod") as string | null;
   const customNumber = formData.get("customNumber") as string | null;
+  const customNumbers = parseCustomNumbers(formData.get("customNumbers") as string | null);
   // Parse quantity, default to 1, max 100 for safety
   let quantity = parseInt(formData.get("quantity") as string) || 1;
   if (quantity < 1) quantity = 1;
   if (quantity > 100) quantity = 100;
-
-  // If custom number is set, force quantity to 1
-  if (customNumber) {
-    quantity = 1;
-  }
 
   const result = schema.safeParse(data);
 
@@ -77,20 +105,48 @@ export async function generateTicketAction(formData: FormData) {
     return { error: "Debes seleccionar un método de pago." };
   }
 
+  const requestedCustomNumbers = customNumbers.length > 0
+    ? customNumbers
+    : customNumber && /^\d{6}$/.test(customNumber)
+      ? [customNumber]
+      : [];
+
+  if (requestedCustomNumbers.length > 100) {
+    return { error: "Solo puedes elegir hasta 100 números por compra." };
+  }
+
+  if (requestedCustomNumbers.length > 0) {
+    quantity = requestedCustomNumbers.length;
+
+    const occupiedNumbers = await prisma.ticket.findMany({
+      where: {
+        ticketNumber: {
+          in: requestedCustomNumbers,
+        },
+      },
+      select: {
+        ticketNumber: true,
+      },
+    });
+
+    if (occupiedNumbers.length > 0) {
+      return {
+        error: `Estos números ya están ocupados: ${occupiedNumbers.map((ticket: { ticketNumber: string }) => ticket.ticketNumber).join(", ")}`,
+      };
+    }
+  }
+
   const createdTickets: string[] = [];
   const errors: string[] = [];
+  const normalizedPhone = normalizePhone(result.data.phone);
+  const verificationLink = buildVerificationLink(normalizedPhone);
 
   // Loop to generate tickets
   for (let i = 0; i < quantity; i++) {
     let ticketNumber: string;
 
-    if (customNumber && /^\d{6}$/.test(customNumber)) {
-      // User chose a custom number - verify it's available
-      const availability = await checkTicketAvailability(customNumber);
-      if (!availability.available) {
-        return { error: "Este número ya está ocupado. Elige otro." };
-      }
-      ticketNumber = customNumber;
+    if (requestedCustomNumbers.length > 0) {
+      ticketNumber = requestedCustomNumbers[i];
     } else {
       // Generate random number
       try {
@@ -160,6 +216,16 @@ export async function generateTicketAction(formData: FormData) {
                 <strong style="color: #fff;">Método de pago:</strong> ${paymentMethod}
               </p>
             </div>
+
+            <div style="background: rgba(59,130,246,0.12); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(96,165,250,0.25);">
+              <p style="color: #bfdbfe; text-align: center; margin-top: 0; font-size: 14px;">Usa este enlace único para consultar todos tus tickets con tu teléfono:</p>
+              <div style="text-align: center; margin-top: 18px;">
+                <a href="${verificationLink}" style="display: inline-block; background: #2563eb; color: #fff; text-decoration: none; padding: 12px 18px; border-radius: 10px; font-weight: 600;">
+                  Ver mis tickets
+                </a>
+              </div>
+              <p style="color: #93c5fd; text-align: center; margin: 16px 0 0; font-size: 12px; word-break: break-all;">${verificationLink}</p>
+            </div>
             
             <p style="color: #9ca3af; text-align: center; font-size: 14px;">Tu pago está siendo verificado. Recibirás otro email cuando tus tickets sean confirmados.</p>
             <p style="color: #9ca3af; text-align: center; font-size: 14px;">¡Gracias por participar y buena suerte! 🍀</p>
@@ -175,5 +241,5 @@ export async function generateTicketAction(formData: FormData) {
   }
 
   // Return list of tickets
-  return { success: true, tickets: createdTickets };
+  return { success: true, tickets: createdTickets, verificationLink };
 }

@@ -78,7 +78,7 @@ export async function getRecentPurchases(limit: number = 5) {
         });
 
         // Anonymize names (just first name initial + last name)
-        return recentTickets.map(ticket => {
+        return recentTickets.map((ticket: { name: string; createdAt: Date }) => {
             const nameParts = ticket.name.split(" ");
             const displayName = nameParts.length > 1
                 ? `${nameParts[0]} ${nameParts[nameParts.length - 1].charAt(0)}.`

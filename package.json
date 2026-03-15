@@ -1,12 +1,13 @@
 {
   "name": "rifa-app",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev -p 7165",
     "build": "next build",
     "start": "next start -p 7165",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "5.21.1",

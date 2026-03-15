@@ -5,6 +5,15 @@ import prisma from '@/lib/prisma'
 import { setSession, clearSession, getSession, AdminPayload } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
+function normalizePhone(phone: string) {
+    return phone.replace(/\D/g, '')
+}
+
+function buildVerificationLink(phone: string) {
+    const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.APP_URL || 'https://rifasmax.com').replace(/\/$/, '')
+    return `${baseUrl}/verify?phone=${phone}`
+}
+
 export async function loginAction(formData: FormData) {
     try {
         const email = formData.get('email') as string
@@ -112,6 +121,7 @@ export async function confirmTicket(ticketId: string, adminId: string) {
 
     // Send confirmation email
     const { sendEmail } = await import('@/lib/nodemailer')
+    const verificationLink = buildVerificationLink(normalizePhone(ticket.phone))
     await sendEmail({
         to: ticket.email,
         subject: '✅ ¡Tu Ticket ha sido Confirmado!',
@@ -123,6 +133,15 @@ export async function confirmTicket(ticketId: string, adminId: string) {
           <p style="color: #9ca3af; margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Tu Número de Ticket</p>
           <h2 style="color: #4ade80; font-size: 36px; margin: 10px 0;">${ticket.ticketNumber}</h2>
           <p style="color: #4ade80; margin: 0;">✓ Confirmado para el Sorteo</p>
+        </div>
+        <div style="background: rgba(59,130,246,0.12); padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid rgba(96,165,250,0.25);">
+          <p style="color: #bfdbfe; text-align: center; margin-top: 0; font-size: 14px;">Consulta todos tus números con este enlace único:</p>
+          <div style="text-align: center; margin-top: 18px;">
+            <a href="${verificationLink}" style="display: inline-block; background: #2563eb; color: #fff; text-decoration: none; padding: 12px 18px; border-radius: 10px; font-weight: 600;">
+              Ver todos mis tickets
+            </a>
+          </div>
+          <p style="color: #93c5fd; text-align: center; margin: 16px 0 0; font-size: 12px; word-break: break-all;">${verificationLink}</p>
         </div>
         <p style="color: #9ca3af; text-align: center;">El sorteo será anunciado próximamente. ¡Mucha suerte! 🍀</p>
       </div>
@@ -144,6 +163,7 @@ export async function rejectTicket(ticketId: string, reason: string) {
 
     // Send rejection email
     const { sendEmail } = await import('@/lib/nodemailer')
+    const verificationLink = buildVerificationLink(normalizePhone(ticket.phone))
     await sendEmail({
         to: ticket.email,
         subject: '❌ Ticket No Confirmado',
@@ -153,6 +173,15 @@ export async function rejectTicket(ticketId: string, reason: string) {
         <p style="color: #ccc; text-align: center;">Tu ticket no pudo ser confirmado.</p>
         <div style="background: rgba(239,68,68,0.1); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #ef4444;">
           <p style="color: #f87171; margin: 0;"><strong>Razón:</strong> ${reason}</p>
+        </div>
+        <div style="background: rgba(59,130,246,0.12); padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid rgba(96,165,250,0.25);">
+          <p style="color: #bfdbfe; text-align: center; margin-top: 0; font-size: 14px;">Desde este enlace puedes revisar todos tus tickets vinculados a tu teléfono:</p>
+          <div style="text-align: center; margin-top: 18px;">
+            <a href="${verificationLink}" style="display: inline-block; background: #2563eb; color: #fff; text-decoration: none; padding: 12px 18px; border-radius: 10px; font-weight: 600;">
+              Ver mis tickets
+            </a>
+          </div>
+          <p style="color: #93c5fd; text-align: center; margin: 16px 0 0; font-size: 12px; word-break: break-all;">${verificationLink}</p>
         </div>
         <p style="color: #9ca3af; text-align: center;">Por favor, intenta nuevamente con un comprobante válido.</p>
       </div>

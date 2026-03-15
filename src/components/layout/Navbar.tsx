@@ -5,8 +5,6 @@ import { motion } from "framer-motion";
 
 export const Navbar = () => {
     const pathname = usePathname();
-    const isLoginPage = pathname === "/admin/login"; // Keep navbar on login? Maybe not. Screenshot showed overlap.
-    // Actually, hide on all /admin
     if (pathname?.startsWith("/admin")) return null;
 
     return (
@@ -30,11 +28,14 @@ export const Navbar = () => {
             </div>
 
             <div className="hidden items-center gap-8 md:flex">
-                <button onClick={() => document.getElementById('amenities-section')?.scrollIntoView({ behavior: 'smooth' })} className="text-xs font-bold uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors">
-                    Premios
-                </button>
                 <button onClick={() => document.getElementById('ticket-section')?.scrollIntoView({ behavior: 'smooth' })} className="rounded-full bg-white px-6 py-3 text-xs font-bold uppercase tracking-widest text-black transition-transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                     Comprar Ticket
+                </button>
+                <button onClick={() => document.getElementById('verify-section')?.scrollIntoView({ behavior: 'smooth' })} className="text-xs font-bold uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors">
+                    Verificar Ticket
+                </button>
+                <button onClick={() => document.getElementById('winners-section')?.scrollIntoView({ behavior: 'smooth' })} className="text-xs font-bold uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors">
+                    Ganadores
                 </button>
             </div>
         </motion.nav>

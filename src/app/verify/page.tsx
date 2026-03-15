@@ -25,7 +25,7 @@ export default function VerifyPage() {
                             Verificar Tu Ticket
                         </h1>
                         <p className="text-white/60 text-lg">
-                            Ingresa tu número de ticket de 6 dígitos para verificar el estado de tu participación.
+                            Ingresa tu teléfono para consultar todos los números asociados a tu compra.
                         </p>
                     </div>
                 </div>

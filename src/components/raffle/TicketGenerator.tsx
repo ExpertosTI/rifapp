@@ -1,7 +1,7 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Check, Send, Ticket as TicketIcon, Upload, PartyPopper, Sparkles, Shuffle, Hash } from "lucide-react";
+import { Copy, Check, Ticket as TicketIcon, Upload, PartyPopper, Sparkles, Shuffle, Hash, X } from "lucide-react";
 import { generateTicketAction, checkTicketAvailability } from "@/app/actions/raffle";
 import confetti from "canvas-confetti";
 import { PaymentMethods } from "./PaymentMethods";
@@ -20,9 +20,11 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
 
     // Número personalizado
     const [customNumber, setCustomNumber] = useState("");
+    const [customNumbers, setCustomNumbers] = useState<string[]>([]);
     const [useCustomNumber, setUseCustomNumber] = useState(false);
     const [checkingNumber, setCheckingNumber] = useState(false);
     const [numberAvailable, setNumberAvailable] = useState<boolean | null>(null);
+    const [verificationLink, setVerificationLink] = useState<string | null>(null);
 
     // Cantidad de tickets
     const [quantity, setQuantity] = useState(1);
@@ -30,6 +32,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
     const ticketPrice = Number(config?.ticketPrice || 3);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const selectedTicketCount = useCustomNumber ? customNumbers.length : quantity;
 
     // Check localStorage for terms acceptance and URL params for quantity
     useEffect(() => {
@@ -50,7 +53,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
         }
     }, []);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             // Limit file size to 5MB
@@ -71,28 +74,64 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
     const checkNumber = async (num: string) => {
         if (num.length !== 6 || !/^\d{6}$/.test(num)) {
             setNumberAvailable(null);
-            return;
+            return false;
         }
 
         setCheckingNumber(true);
         try {
             const result = await checkTicketAvailability(num);
             setNumberAvailable(result.available);
+            return result.available;
         } catch {
             setNumberAvailable(null);
+            return false;
+        } finally {
+            setCheckingNumber(false);
         }
-        setCheckingNumber(false);
     };
 
-    const handleCustomNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCustomNumberChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/\D/g, "").slice(0, 6);
         setCustomNumber(value);
         setNumberAvailable(null);
-        setQuantity(1); // Force quantity to 1 when choosing custom number
 
         if (value.length === 6) {
-            checkNumber(value);
+            void checkNumber(value);
         }
+    };
+
+    const addCustomNumber = async () => {
+        if (customNumbers.length >= 100) {
+            setError("Solo puedes elegir hasta 100 números por compra.");
+            return;
+        }
+
+        if (customNumber.length !== 6) {
+            setError("Cada número debe tener 6 dígitos.");
+            return;
+        }
+
+        if (customNumbers.includes(customNumber)) {
+            setError("Ese número ya está en tu selección.");
+            return;
+        }
+
+        const available = numberAvailable === true ? true : await checkNumber(customNumber);
+
+        if (!available) {
+            setError("Ese número ya está ocupado. Elige otro.");
+            return;
+        }
+
+        setCustomNumbers((current: string[]) => [...current, customNumber]);
+        setCustomNumber("");
+        setNumberAvailable(null);
+        setError(null);
+    };
+
+    const removeCustomNumber = (ticketNumber: string) => {
+        setCustomNumbers((current: string[]) => current.filter((item: string) => item !== ticketNumber));
+        setError(null);
     };
 
     const handleQuantityChange = (delta: number) => {
@@ -141,7 +180,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
         }, 200);
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!termsAccepted) {
@@ -159,36 +198,58 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
             return;
         }
 
-        if (useCustomNumber && customNumber.length !== 6) {
-            setError("El número debe tener 6 dígitos.");
-            return;
-        }
-
-        if (useCustomNumber && numberAvailable === false) {
-            setError("Este número ya está ocupado. Elige otro.");
-            return;
-        }
-
         setLoading(true);
         setError(null);
+
+        let selectedNumbers = customNumbers;
+
+        if (useCustomNumber && customNumber.length > 0) {
+            if (customNumber.length !== 6) {
+                setError("Cada número debe tener 6 dígitos.");
+                setLoading(false);
+                return;
+            }
+
+            if (!selectedNumbers.includes(customNumber)) {
+                const available = numberAvailable === true ? true : await checkNumber(customNumber);
+
+                if (!available) {
+                    setError("Ese número ya está ocupado. Elige otro.");
+                    setLoading(false);
+                    return;
+                }
+
+                selectedNumbers = [...selectedNumbers, customNumber];
+                setCustomNumbers(selectedNumbers);
+                setCustomNumber("");
+                setNumberAvailable(null);
+            }
+        }
+
+        if (useCustomNumber && selectedNumbers.length === 0) {
+            setError("Debes agregar al menos un número para continuar.");
+            setLoading(false);
+            return;
+        }
 
         const formData = new FormData(e.currentTarget);
         formData.set('paymentProof', paymentProof);
         formData.set('paymentMethod', paymentMethod);
-        formData.set('quantity', quantity.toString());
+        formData.set('quantity', (useCustomNumber ? selectedNumbers.length : quantity).toString());
 
-        if (useCustomNumber && customNumber) {
-            formData.set('customNumber', customNumber);
+        if (useCustomNumber) {
+            formData.set('customNumbers', JSON.stringify(selectedNumbers));
         }
 
         const result: any = await generateTicketAction(formData);
 
         if (result.success && result.tickets) {
             setTickets(result.tickets);
+            setVerificationLink(result.verificationLink || null);
             fireConfetti();
         } else if (result.ticket) {
-            // Fallback for single ticket legacy response support
             setTickets([result.ticket]);
+            setVerificationLink(result.verificationLink || null);
             fireConfetti();
         } else {
             setError(result.error || "Algo salió mal. Intenta de nuevo.");
@@ -208,9 +269,11 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
         setFileName(null);
         setPaymentMethod("");
         setCustomNumber("");
+        setCustomNumbers([]);
         setUseCustomNumber(false);
         setNumberAvailable(null);
         setQuantity(1);
+        setVerificationLink(null);
     };
 
     const handleTermsAccept = () => {
@@ -298,6 +361,10 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                             type="button"
                                                             onClick={() => {
                                                                 setUseCustomNumber(false);
+                                                                setCustomNumber("");
+                                                                setCustomNumbers([]);
+                                                                setNumberAvailable(null);
+                                                                setError(null);
                                                             }}
                                                             className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${!useCustomNumber
                                                                 ? 'bg-yellow-500 text-black'
@@ -310,7 +377,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                             type="button"
                                                             onClick={() => {
                                                                 setUseCustomNumber(true);
-                                                                setQuantity(1);
+                                                                setError(null);
                                                             }}
                                                             className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${useCustomNumber
                                                                 ? 'bg-yellow-500 text-black'
@@ -323,34 +390,77 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                 </div>
 
                                                 {useCustomNumber ? (
-                                                    <div className="relative">
-                                                        <input
-                                                            type="text"
-                                                            value={customNumber}
-                                                            onChange={handleCustomNumberChange}
-                                                            placeholder="000000"
-                                                            maxLength={6}
-                                                            className={`w-full rounded-xl border ${numberAvailable === true
-                                                                ? 'border-green-500/50 bg-green-500/10'
-                                                                : numberAvailable === false
-                                                                    ? 'border-red-500/50 bg-red-500/10'
-                                                                    : 'border-white/10 bg-white/5'
-                                                                } px-4 py-3 text-center text-2xl font-mono tracking-[0.5em] text-white placeholder-white/20 transition-all focus:outline-none`}
-                                                        />
-                                                        {checkingNumber && (
-                                                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                    <div className="space-y-3">
+                                                        <div className="flex gap-2">
+                                                            <div className="relative flex-1">
+                                                                <input
+                                                                    type="text"
+                                                                    value={customNumber}
+                                                                    onChange={handleCustomNumberChange}
+                                                                    onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+                                                                        if (e.key === "Enter") {
+                                                                            e.preventDefault();
+                                                                            void addCustomNumber();
+                                                                        }
+                                                                    }}
+                                                                    placeholder="000000"
+                                                                    maxLength={6}
+                                                                    className={`w-full rounded-xl border ${numberAvailable === true
+                                                                        ? 'border-green-500/50 bg-green-500/10'
+                                                                        : numberAvailable === false
+                                                                            ? 'border-red-500/50 bg-red-500/10'
+                                                                            : 'border-white/10 bg-white/5'
+                                                                        } px-4 py-3 text-center text-2xl font-mono tracking-[0.5em] text-white placeholder-white/20 transition-all focus:outline-none`}
+                                                                />
+                                                                {checkingNumber && (
+                                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                                    </div>
+                                                                )}
+                                                                {!checkingNumber && numberAvailable === true && (
+                                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400">
+                                                                        <Check className="w-5 h-5" />
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                        )}
-                                                        {!checkingNumber && numberAvailable === true && (
-                                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400">
-                                                                <Check className="w-5 h-5" />
-                                                            </div>
-                                                        )}
-                                                        {!checkingNumber && numberAvailable === false && (
-                                                            <p className="text-xs text-red-400 mt-1 text-center">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => void addCustomNumber()}
+                                                                disabled={checkingNumber || customNumber.length !== 6}
+                                                                className="rounded-xl bg-yellow-500 px-4 py-3 text-sm font-semibold text-black transition-all hover:bg-yellow-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                                            >
+                                                                Agregar
+                                                            </button>
+                                                        </div>
+                                                        {numberAvailable === false && !checkingNumber && (
+                                                            <p className="text-xs text-red-400 text-center">
                                                                 Este número ya está ocupado
                                                             </p>
+                                                        )}
+                                                        <p className="text-xs text-white/50 text-center">
+                                                            Agrega uno o varios números de 6 dígitos.
+                                                        </p>
+                                                        {customNumbers.length > 0 && (
+                                                            <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+                                                                <div className="mb-2 flex items-center justify-between">
+                                                                    <span className="text-xs uppercase tracking-[0.2em] text-white/40">Tus números elegidos</span>
+                                                                    <span className="text-xs font-semibold text-yellow-400">{customNumbers.length} seleccionado{customNumbers.length > 1 ? "s" : ""}</span>
+                                                                </div>
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {customNumbers.map((ticketNumber: string) => (
+                                                                        <span key={ticketNumber} className="inline-flex items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1 text-sm font-mono text-yellow-300">
+                                                                            {ticketNumber}
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => removeCustomNumber(ticketNumber)}
+                                                                                className="text-yellow-200 transition-colors hover:text-white"
+                                                                            >
+                                                                                <X className="h-3.5 w-3.5" />
+                                                                            </button>
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 ) : (
@@ -380,7 +490,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
 
                                                 <div className="flex justify-between items-center pt-2 border-t border-white/5">
                                                     <span className="text-white/60">Total a Pagar:</span>
-                                                    <span className="text-xl font-bold text-yellow-400">${(quantity * ticketPrice).toFixed(2)}</span>
+                                                    <span className="text-xl font-bold text-yellow-400">${(selectedTicketCount * ticketPrice).toFixed(2)}</span>
                                                 </div>
                                             </div>
 
@@ -430,7 +540,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                 <input
                                                     type="checkbox"
                                                     checked={termsAccepted}
-                                                    onChange={(e) => {
+                                                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
                                                         if (e.target.checked && !termsAccepted) {
                                                             setShowTerms(true);
                                                         } else {
@@ -473,7 +583,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/30 border-t-black" />
                                             ) : (
                                                 <>
-                                                    Participar ({quantity} Ticket{quantity > 1 ? 's' : ''}) <Sparkles className="h-5 w-5" />
+                                                    Participar ({selectedTicketCount} Ticket{selectedTicketCount !== 1 ? 's' : ''}) <Sparkles className="h-5 w-5" />
                                                 </>
                                             )}
                                         </motion.button>
@@ -505,7 +615,7 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                         </div>
 
                                         <div className="w-full max-h-[300px] overflow-y-auto space-y-4 pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                                            {tickets.map((ticketNum, index) => (
+                                            {tickets.map((ticketNum: string, index: number) => (
                                                 <div key={ticketNum} className="relative w-full max-w-sm mx-auto overflow-hidden rounded-3xl border border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 px-8 py-6 shadow-2xl backdrop-blur-md">
                                                     <div className="absolute top-0 right-0 p-4 opacity-20">
                                                         <TicketIcon className="h-12 w-12 text-yellow-400" />
@@ -536,6 +646,15 @@ export const TicketGenerator = ({ config }: { config?: any }) => {
                                             <p className="text-xs text-white/50 text-center px-4">
                                                 Recibirás un email y WhatsApp cuando tus tickets sean confirmados.
                                             </p>
+
+                                            {verificationLink && (
+                                                <a
+                                                    href={verificationLink}
+                                                    className="flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500"
+                                                >
+                                                    Ver mis tickets por teléfono
+                                                </a>
+                                            )}
 
                                             <button
                                                 onClick={resetForm}

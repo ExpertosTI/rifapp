@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
-
-const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
     title: "Rifa Inmobiliaria de Lujo",
@@ -17,7 +14,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="es">
-            <body className={outfit.className}>
+            <body className="antialiased">
                 <Navbar />
                 {children}
             </body>

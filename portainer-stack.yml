@@ -31,6 +31,8 @@ services:
       - DATABASE_URL=postgresql://postgres:JustDtBase2027%40@db:5432/rifapp?schema=public
       - NODE_ENV=production
       - PORT=7165
+      - APP_URL=https://rifapp.renace.space
+      - NEXT_PUBLIC_SITE_URL=https://rifapp.renace.space
       # Correo
       - SMTP_HOST=smtp.hostinger.com
       - SMTP_PORT=465

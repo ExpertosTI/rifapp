@@ -1,10 +1,12 @@
 import { Hero } from "@/components/home/Hero";
 import { Amenities } from "@/components/home/Amenities";
 import { TicketGenerator } from "@/components/raffle/TicketGenerator";
+import { TicketChecker } from "@/components/raffle/TicketChecker";
 import { Countdown } from "@/components/home/Countdown";
 import { SocialProof } from "@/components/home/SocialProof";
 import { ProgressBar } from "@/components/home/ProgressBar";
 import { TrustSection } from "@/components/home/TrustSection";
+import { WinnersGallery } from "@/components/home/WinnersGallery";
 
 import { getRaffleConfig } from "@/app/actions/config";
 
@@ -46,6 +48,14 @@ export default async function Home() {
                 <TicketGenerator config={safeConfig} />
             </div>
 
+            <div id="verify-section">
+                <TicketChecker />
+            </div>
+
+            <div id="winners-section">
+                <WinnersGallery />
+            </div>
+
             {/* Premios - Vehículos */}
             <div id="amenities-section">
                 <Amenities />
@@ -54,13 +64,6 @@ export default async function Home() {
             {/* FAQ + Trust Badges */}
             <TrustSection />
 
-            {/* Floating verify link */}
-            <a
-                href="/verify"
-                className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-full shadow-lg shadow-blue-500/25 transition-all hover:scale-105"
-            >
-                🔍 Verificar Ticket
-            </a>
         </main>
     );
 }
