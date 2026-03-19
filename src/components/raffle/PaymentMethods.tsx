@@ -114,32 +114,38 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
     const [expanded, setExpanded] = useState<string | null>(null);
 
     const getPaymentDetails = (methodId: string) => {
+        const contactName = config?.paymentAlias || "Rifamax";
+        const contactEmail = config?.paymentEmail || "pagos@rifasmax.com";
+
         switch (methodId) {
             case "USDT":
                 return {
-                    wallet: config?.usdtWallet || "TVYQpPjBp1xe8qGCkv9U2NkpZTxxxxxx",
-                    network: config?.usdtNetwork || "TRC20",
+                    alias: contactName,
+                    instructions: "Solicita la dirección de depósito por soporte. No se muestra al cliente.",
                 };
             case "ZELLE":
                 return {
-                    email: config?.zelleEmail || "pagos@rifasmax.com",
-                    name: config?.zelleName || "Rifasmax RD",
+                    alias: contactName,
+                    instructions: "Transferencia Zelle al alias registrado. Solicita el correo al soporte.",
+                    email: contactEmail,
                 };
             case "PAYPAL":
                 return {
-                    email: config?.paypalEmail || "pagos@rifasmax.com",
+                    alias: contactName,
+                    instructions: "Solicita el enlace o correo PayPal al soporte.",
+                    email: contactEmail,
                     link: config?.paypalLink,
                 };
             case "GOOGLEPAY":
                 return {
-                    number: config?.googlePayNumber || "",
+                    alias: contactName,
+                    instructions: "Pide el correo Google Pay al soporte.",
                 };
             case "VISA":
             case "MASTERCARD":
                 return {
-                    bank: config?.bankName || "Banco Popular Dominicano",
-                    account: config?.bankAccount || "XXXX-XXXX-XXXX",
-                    holder: config?.bankHolder || "Rifasmax SRL",
+                    alias: contactName,
+                    instructions: "Los datos de tarjeta o cuenta se comparten solo por soporte.",
                 };
             default:
                 return {};
@@ -202,20 +208,11 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                             {selected === "USDT" && (
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Red:</span>
-                                        <span className="text-green-400 font-mono">{getPaymentDetails("USDT").network}</span>
+                                        <span className="text-white/40">Alias:</span>
+                                        <span className="text-green-400 font-medium">{getPaymentDetails("USDT").alias}</span>
                                     </div>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={getPaymentDetails("USDT").wallet}
-                                            readOnly
-                                            className="w-full bg-black/30 rounded-lg px-3 py-2 text-xs font-mono text-white/80 pr-10"
-                                        />
-                                        <CopyButton text={getPaymentDetails("USDT").wallet || ""} />
-                                    </div>
-                                    <p className="text-[10px] text-yellow-400/70">
-                                        ⚠️ Solo envía USDT por red TRC20. Otras redes no serán acreditadas.
+                                    <p className="text-[10px] text-green-300/70">
+                                        ✅ Para pagos en Binance/USDT solicita la dirección al soporte. No se muestra públicamente.
                                     </p>
                                 </div>
                             )}
@@ -223,20 +220,11 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                             {selected === "ZELLE" && (
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Enviar a:</span>
-                                        <span className="text-purple-400 font-medium">{getPaymentDetails("ZELLE").name}</span>
+                                        <span className="text-white/40">Alias:</span>
+                                        <span className="text-purple-400 font-medium">{getPaymentDetails("ZELLE").alias}</span>
                                     </div>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={getPaymentDetails("ZELLE").email}
-                                            readOnly
-                                            className="w-full bg-black/30 rounded-lg px-3 py-2 text-xs font-mono text-white/80 pr-10"
-                                        />
-                                        <CopyButton text={getPaymentDetails("ZELLE").email || ""} />
-                                    </div>
-                                    <p className="text-[10px] text-purple-400/70">
-                                        📧 Incluye tu email en la nota del pago para identificarte.
+                                    <p className="text-[10px] text-purple-300/70">
+                                        ✉️ Solicita el correo Zelle al soporte. No se muestran datos de cuenta al cliente.
                                     </p>
                                 </div>
                             )}
@@ -244,68 +232,31 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                             {(selected === "VISA" || selected === "MASTERCARD") && (
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Banco:</span>
-                                        <span className="text-blue-400 font-medium">{getPaymentDetails(selected).bank}</span>
+                                        <span className="text-white/40">Beneficiario:</span>
+                                        <span className="text-blue-400 font-medium">{getPaymentDetails(selected).alias}</span>
                                     </div>
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Titular:</span>
-                                        <span className="text-white/80">{getPaymentDetails(selected).holder}</span>
-                                    </div>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={getPaymentDetails(selected).account}
-                                            readOnly
-                                            className="w-full bg-black/30 rounded-lg px-3 py-2 text-xs font-mono text-white/80 pr-10"
-                                        />
-                                        <CopyButton text={getPaymentDetails(selected).account || ""} />
-                                    </div>
-                                    <p className="text-[10px] text-blue-400/70">
-                                        💳 Transferencia bancaria o depósito en cuenta.
+                                    <p className="text-[10px] text-blue-300/70">
+                                        💳 Datos de tarjeta o cuenta se comparten solo al confirmar con soporte. No se exponen aquí.
                                     </p>
                                 </div>
                             )}
 
                             {selected === "PAYPAL" && (
                                 <div className="space-y-2">
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={getPaymentDetails("PAYPAL").email}
-                                            readOnly
-                                            className="w-full bg-black/30 rounded-lg px-3 py-2 text-xs font-mono text-white/80 pr-10"
-                                        />
-                                        <CopyButton text={getPaymentDetails("PAYPAL").email || ""} />
-                                    </div>
-                                    {getPaymentDetails("PAYPAL").link && (
-                                        <a
-                                            href={getPaymentDetails("PAYPAL").link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="block w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-center text-sm font-medium transition-colors"
-                                        >
-                                            Pagar con PayPal
-                                        </a>
-                                    )}
-                                    <p className="text-[10px] text-blue-400/70">
-                                        💰 Envía como "Amigos y Familiares" para evitar comisiones.
+                                    <p className="text-[10px] text-blue-300/70">
+                                        💰 Solicita el correo/enlace PayPal al soporte. No se expone públicamente.
                                     </p>
                                 </div>
                             )}
 
                             {selected === "GOOGLEPAY" && (
                                 <div className="space-y-2">
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={getPaymentDetails("GOOGLEPAY").number}
-                                            readOnly
-                                            className="w-full bg-black/30 rounded-lg px-3 py-2 text-xs font-mono text-white/80 pr-10"
-                                        />
-                                        <CopyButton text={getPaymentDetails("GOOGLEPAY").number || ""} />
+                                    <div className="flex items-center justify-between text-xs">
+                                        <span className="text-white/40">Alias:</span>
+                                        <span className="text-red-400 font-medium">{getPaymentDetails("GOOGLEPAY").alias}</span>
                                     </div>
-                                    <p className="text-[10px] text-red-400/70">
-                                        📱 Agrega este correo / número en tu app de Google Pay para enviar.
+                                    <p className="text-[10px] text-red-300/70">
+                                        📱 Solicita el correo/número Google Pay al soporte. No se expone aquí.
                                     </p>
                                 </div>
                             )}
