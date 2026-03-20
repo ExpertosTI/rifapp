@@ -62,11 +62,11 @@ interface PaymentMethodsProps {
 const paymentMethods = [
     {
         id: "USDT",
-        name: "USDT (Tether)",
+        name: "Binance (USDT)",
         icon: UsdtIcon,
         color: "from-green-500/20 to-green-600/20",
         borderColor: "border-green-500/30",
-        description: "Criptomoneda estable"
+        description: "Pago en Binance / USDT"
     },
     {
         id: "ZELLE",
@@ -114,26 +114,24 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
     const [expanded, setExpanded] = useState<string | null>(null);
 
     const getPaymentDetails = (methodId: string) => {
-        const contactName = config?.paymentAlias || "Rifamax";
+        const contactName = "Rifamax";
         const contactEmail = config?.paymentEmail || "pagos@rifasmax.com";
 
         switch (methodId) {
             case "USDT":
                 return {
                     alias: contactName,
-                    instructions: "Solicita la dirección de depósito por soporte. No se muestra al cliente.",
+                    instructions: "En Binance P2P paga a usuario Rifamax. Solicita el QR/dirección al soporte.",
                 };
             case "ZELLE":
                 return {
                     alias: contactName,
-                    instructions: "Transferencia Zelle al alias registrado. Solicita el correo al soporte.",
-                    email: contactEmail,
+                    instructions: "Transferencia Zelle al alias. Solicita el correo al soporte.",
                 };
             case "PAYPAL":
                 return {
                     alias: contactName,
                     instructions: "Solicita el enlace o correo PayPal al soporte.",
-                    email: contactEmail,
                     link: config?.paypalLink,
                 };
             case "GOOGLEPAY":
@@ -208,11 +206,11 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                             {selected === "USDT" && (
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Alias:</span>
+                                        <span className="text-white/40">Nombre:</span>
                                         <span className="text-green-400 font-medium">{getPaymentDetails("USDT").alias}</span>
                                     </div>
                                     <p className="text-[10px] text-green-300/70">
-                                        ✅ Para pagos en Binance/USDT solicita la dirección al soporte. No se muestra públicamente.
+                                        ✅ Binance/USDT: busca al usuario Rifamax o pide el QR/dirección al soporte. No se muestran datos aquí.
                                     </p>
                                 </div>
                             )}
@@ -220,11 +218,11 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                             {selected === "ZELLE" && (
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Alias:</span>
+                                        <span className="text-white/40">Nombre:</span>
                                         <span className="text-purple-400 font-medium">{getPaymentDetails("ZELLE").alias}</span>
                                     </div>
                                     <p className="text-[10px] text-purple-300/70">
-                                        ✉️ Solicita el correo Zelle al soporte. No se muestran datos de cuenta al cliente.
+                                        ✉️ Solicita el correo Zelle al soporte. No se muestran remitentes ni cuentas al cliente.
                                     </p>
                                 </div>
                             )}
@@ -232,11 +230,11 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                             {(selected === "VISA" || selected === "MASTERCARD") && (
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Beneficiario:</span>
+                                        <span className="text-white/40">Nombre:</span>
                                         <span className="text-blue-400 font-medium">{getPaymentDetails(selected).alias}</span>
                                     </div>
                                     <p className="text-[10px] text-blue-300/70">
-                                        💳 Datos de tarjeta o cuenta se comparten solo al confirmar con soporte. No se exponen aquí.
+                                        💳 Datos de tarjeta/cuenta solo vía soporte. No se expone remitente ni número aquí.
                                     </p>
                                 </div>
                             )}
@@ -252,7 +250,7 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                             {selected === "GOOGLEPAY" && (
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Alias:</span>
+                                        <span className="text-white/40">Nombre:</span>
                                         <span className="text-red-400 font-medium">{getPaymentDetails("GOOGLEPAY").alias}</span>
                                     </div>
                                     <p className="text-[10px] text-red-300/70">
