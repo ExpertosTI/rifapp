@@ -66,7 +66,8 @@ const paymentMethods = [
         icon: UsdtIcon,
         color: "from-green-500/20 to-green-600/20",
         borderColor: "border-green-500/30",
-        description: "Pago en Binance / USDT"
+        description: "Pago en Binance / USDT",
+        configKey: "hasUsdt"
     },
     {
         id: "ZELLE",
@@ -74,7 +75,8 @@ const paymentMethods = [
         icon: ZelleIcon,
         color: "from-purple-500/20 to-purple-600/20",
         borderColor: "border-purple-500/30",
-        description: "Transferencia bancaria USA"
+        description: "Transferencia bancaria USA",
+        configKey: "hasZelle"
     },
     {
         id: "VISA",
@@ -82,7 +84,8 @@ const paymentMethods = [
         icon: VisaIcon,
         color: "from-blue-500/20 to-blue-600/20",
         borderColor: "border-blue-500/30",
-        description: "Tarjeta de crédito/débito"
+        description: "Tarjeta de crédito/débito",
+        configKey: "hasBank"
     },
     {
         id: "MASTERCARD",
@@ -90,7 +93,8 @@ const paymentMethods = [
         icon: MastercardIcon,
         color: "from-orange-500/20 to-red-600/20",
         borderColor: "border-orange-500/30",
-        description: "Tarjeta de crédito/débito"
+        description: "Tarjeta de crédito/débito",
+        configKey: "hasBank"
     },
     {
         id: "PAYPAL",
@@ -98,7 +102,8 @@ const paymentMethods = [
         icon: PaypalIcon,
         color: "from-blue-600/20 to-blue-700/20",
         borderColor: "border-blue-600/30",
-        description: "Pago en línea"
+        description: "Pago en línea",
+        configKey: "hasPaypal"
     },
     {
         id: "GOOGLEPAY",
@@ -106,16 +111,22 @@ const paymentMethods = [
         icon: GooglePayIcon,
         color: "from-red-500/20 to-red-600/20",
         borderColor: "border-red-500/30",
-        description: "Pago móvil"
+        description: "Pago móvil",
+        configKey: "hasGooglePay"
     },
 ];
 
 export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsProps) => {
     const [expanded, setExpanded] = useState<string | null>(null);
 
+    // Filter payment methods based on config flags
+    const activeMethods = paymentMethods.filter(method => {
+        const key = method.configKey as keyof any;
+        return config && config[key] === true;
+    });
+
     const getPaymentDetails = (methodId: string) => {
         const contactName = "Rifamax";
-        const contactEmail = config?.paymentEmail || "pagos@rifasmax.com";
 
         switch (methodId) {
             case "USDT":
@@ -132,7 +143,6 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                 return {
                     alias: contactName,
                     instructions: "Solicita el enlace o correo PayPal al soporte.",
-                    link: config?.paypalLink,
                 };
             case "GOOGLEPAY":
                 return {
@@ -154,7 +164,7 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
         <div className="space-y-2">
             <label className="text-sm text-white/60 font-medium">Método de Pago</label>
             <div className="grid grid-cols-6 gap-2">
-                {paymentMethods.map((method) => (
+                {activeMethods.map((method) => (
                     <motion.button
                         key={method.id}
                         type="button"
@@ -170,8 +180,8 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                             }`}
                     >
                         <method.icon />
-                        <span className="text-[10px] text-white/60 mt-1 truncate w-full text-center">
-                            {method.id}
+                        <span className="text-[10px] text-white/60 mt-1 truncate w-full text-center uppercase">
+                            {method.id === "USDT" ? "Binance" : method.id}
                         </span>
                         {selected === method.id && (
                             <motion.div
@@ -185,6 +195,15 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                     </motion.button>
                 ))}
             </div>
+
+            {/* If no methods are configured, show a message */}
+            {activeMethods.length === 0 && (
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-center">
+                    <p className="text-xs text-red-400">
+                        No hay métodos de pago configurados. Por favor, contacta a soporte.
+                    </p>
+                </div>
+            )}
 
             {/* Payment Details */}
             <AnimatePresence>

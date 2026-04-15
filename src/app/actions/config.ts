@@ -19,22 +19,38 @@ export async function getRaffleConfig() {
             endDate: null,
             drawDate: null,
             totalTickets: 1000000,
-            // Payment defaults
-            usdtWallet: null,
-            usdtNetwork: "TRC20",
-            zelleEmail: null,
-            zelleName: null,
-            paypalEmail: null,
-            paypalLink: null,
-            bankName: null,
-            bankAccount: null,
-            bankHolder: null,
-            googlePayNumber: null,
+            // Public payment info (only flags or public details)
+            hasUsdt: false,
+            hasZelle: false,
+            hasPaypal: false,
+            hasBank: false,
+            hasGooglePay: false,
             whatsappNumber: null,
         }
     }
 
-    return config
+    // Return only public fields to prevent data leaks
+    return {
+        id: config.id,
+        productName: config.productName,
+        description: config.description,
+        ticketPrice: Number(config.ticketPrice),
+        currency: config.currency,
+        imageUrl: config.imageUrl,
+        galleryIds: config.galleryIds,
+        startDate: config.startDate,
+        endDate: config.endDate,
+        drawDate: config.drawDate,
+        isActive: config.isActive,
+        totalTickets: config.totalTickets,
+        // Flags for payment methods (don't send actual wallet/account data to frontend)
+        hasUsdt: !!config.usdtWallet,
+        hasZelle: !!config.zelleEmail,
+        hasPaypal: !!config.paypalEmail,
+        hasBank: !!config.bankAccount,
+        hasGooglePay: !!config.googlePayNumber,
+        whatsappNumber: config.whatsappNumber,
+    }
 }
 
 export async function updateRaffleConfig(data: any) {

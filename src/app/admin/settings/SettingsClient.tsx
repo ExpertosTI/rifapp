@@ -221,12 +221,20 @@ export default function SettingsClient({ initialConfig }: { initialConfig: any }
 
                         {/* USDT */}
                         <div className="p-4 bg-green-500/5 border border-green-500/20 rounded-xl space-y-3">
-                            <h3 className="font-semibold text-green-400 flex items-center gap-2">
-                                <span className="text-lg">🟢</span> USDT (Tether)
-                            </h3>
+                            <div className="flex items-center justify-between">
+                                <h3 className="font-semibold text-green-400 flex items-center gap-2">
+                                    <span className="text-lg">🟢</span> Binance (USDT)
+                                </h3>
+                                <span className="text-[10px] bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full border border-green-500/20">
+                                    Solo Administrativo
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-slate-400 italic">
+                                * Estos datos NO se muestran al usuario. Solo se usan para confirmar que tienes el método activo.
+                            </p>
                             <div className="grid grid-cols-3 gap-3">
                                 <div className="col-span-2">
-                                    <label className="block text-xs text-slate-400 mb-1">Wallet Address</label>
+                                    <label className="block text-xs text-slate-400 mb-1">Wallet Address / Usuario Binance</label>
                                     <input
                                         type="text"
                                         value={config.usdtWallet || ''}
@@ -252,9 +260,14 @@ export default function SettingsClient({ initialConfig }: { initialConfig: any }
 
                         {/* Zelle */}
                         <div className="p-4 bg-purple-500/5 border border-purple-500/20 rounded-xl space-y-3">
-                            <h3 className="font-semibold text-purple-400 flex items-center gap-2">
-                                <span className="text-lg">💜</span> Zelle
-                            </h3>
+                            <div className="flex items-center justify-between">
+                                <h3 className="font-semibold text-purple-400 flex items-center gap-2">
+                                    <span className="text-lg">💜</span> Zelle
+                                </h3>
+                                <span className="text-[10px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/20">
+                                    Solo Administrativo
+                                </span>
+                            </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs text-slate-400 mb-1">Email Zelle</label>
@@ -281,9 +294,14 @@ export default function SettingsClient({ initialConfig }: { initialConfig: any }
 
                         {/* PayPal */}
                         <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl space-y-3">
-                            <h3 className="font-semibold text-blue-400 flex items-center gap-2">
-                                <span className="text-lg">💙</span> PayPal
-                            </h3>
+                            <div className="flex items-center justify-between">
+                                <h3 className="font-semibold text-blue-400 flex items-center gap-2">
+                                    <span className="text-lg">💙</span> PayPal
+                                </h3>
+                                <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/20">
+                                    Solo Administrativo
+                                </span>
+                            </div>
                             <div className="space-y-3">
                                 <div>
                                     <label className="block text-xs text-slate-400 mb-1">Email PayPal</label>
@@ -310,9 +328,14 @@ export default function SettingsClient({ initialConfig }: { initialConfig: any }
 
                         {/* Bank Transfer (Visa/MC) */}
                         <div className="p-4 bg-orange-500/5 border border-orange-500/20 rounded-xl space-y-3">
-                            <h3 className="font-semibold text-orange-400 flex items-center gap-2">
-                                <span className="text-lg">🏦</span> Transferencia Bancaria (Visa/MC)
-                            </h3>
+                            <div className="flex items-center justify-between">
+                                <h3 className="font-semibold text-orange-400 flex items-center gap-2">
+                                    <span className="text-lg">🏦</span> Transferencia Bancaria (Visa/MC)
+                                </h3>
+                                <span className="text-[10px] bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/20">
+                                    Solo Administrativo
+                                </span>
+                            </div>
                             <div className="space-y-3">
                                 <div>
                                     <label className="block text-xs text-slate-400 mb-1">Nombre del Banco</label>
@@ -351,9 +374,14 @@ export default function SettingsClient({ initialConfig }: { initialConfig: any }
 
                         {/* Google Pay */}
                         <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-xl space-y-3">
-                            <h3 className="font-semibold text-red-400 flex items-center gap-2">
-                                <span className="text-lg">📱</span> Google Pay
-                            </h3>
+                            <div className="flex items-center justify-between">
+                                <h3 className="font-semibold text-red-400 flex items-center gap-2">
+                                    <span className="text-lg">📱</span> Google Pay
+                                </h3>
+                                <span className="text-[10px] bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full border border-red-500/20">
+                                    Solo Administrativo
+                                </span>
+                            </div>
                             <div>
                                 <label className="block text-xs text-slate-400 mb-1">Número / Email Google Pay</label>
                                 <input
