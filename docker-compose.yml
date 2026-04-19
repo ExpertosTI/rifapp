@@ -1,9 +1,9 @@
 services:
   app:
-    build: .
     image: expertos-ti/rifapp:latest
-    ports:
-      - "7165:7165"
+    build: .
+    networks:
+      - RenaceNet
     environment:
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
@@ -11,11 +11,27 @@ services:
       - SMTP_PASS=${SMTP_PASS}
       - APP_URL=${APP_URL}
       - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
-      # Construct DB URL dynamically from secure vars
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
     depends_on:
       - db
-    restart: always
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.rifapp.rule=Host(`rifapp.renace.tech`)"
+        - "traefik.http.routers.rifapp.entrypoints=websecure"
+        - "traefik.http.routers.rifapp.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.rifapp.loadbalancer.server.port=7165"
+        - "traefik.http.routers.rifapp-http.rule=Host(`rifapp.renace.tech`)"
+        - "traefik.http.routers.rifapp-http.entrypoints=web"
+        - "traefik.http.routers.rifapp-http.middlewares=redirect-to-https"
+        - "traefik.docker.network=RenaceNet"
 
   db:
     image: postgres:15-alpine
@@ -25,7 +41,15 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - rifa_postgres_data:/var/lib/postgresql/data
-    restart: always
+    networks:
+      - RenaceNet
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+networks:
+  RenaceNet:
+    external: true
 
 volumes:
   rifa_postgres_data:
