@@ -125,38 +125,32 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
         return config && config[key] === true;
     });
 
+    // No se expone ningún dato sensible, solo instrucciones genéricas
     const getPaymentDetails = (methodId: string) => {
-        const contactName = "Rifamax";
-
         switch (methodId) {
             case "USDT":
                 return {
-                    alias: contactName,
-                    instructions: "En Binance P2P paga a usuario Rifamax. Solicita el QR/dirección al soporte.",
+                    instructions: "Solicita el QR o dirección USDT al soporte oficial. Nunca se muestra aquí.",
                 };
             case "ZELLE":
                 return {
-                    alias: contactName,
-                    instructions: "Transferencia Zelle al alias. Solicita el correo al soporte.",
+                    instructions: "Solicita el correo Zelle al soporte oficial. Nunca se muestra aquí.",
                 };
             case "PAYPAL":
                 return {
-                    alias: contactName,
-                    instructions: "Solicita el enlace o correo PayPal al soporte.",
+                    instructions: "Solicita el enlace o correo PayPal al soporte oficial. Nunca se muestra aquí.",
                 };
             case "GOOGLEPAY":
                 return {
-                    alias: contactName,
-                    instructions: "Pide el correo Google Pay al soporte.",
+                    instructions: "Solicita el correo/número Google Pay al soporte oficial. Nunca se muestra aquí.",
                 };
             case "VISA":
             case "MASTERCARD":
                 return {
-                    alias: contactName,
-                    instructions: "Los datos de tarjeta o cuenta se comparten solo por soporte.",
+                    instructions: "Solicita los datos de tarjeta/cuenta al soporte oficial. Nunca se muestra aquí.",
                 };
             default:
-                return {};
+                return { instructions: "Solicita los datos al soporte oficial." };
         }
     };
 
@@ -221,62 +215,14 @@ export const PaymentMethods = ({ config, selected, onSelect }: PaymentMethodsPro
                                     {paymentMethods.find(m => m.id === selected)?.name}
                                 </span>
                             </div>
-
-                            {selected === "USDT" && (
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Nombre:</span>
-                                        <span className="text-green-400 font-medium">{getPaymentDetails("USDT").alias}</span>
-                                    </div>
-                                    <p className="text-[10px] text-green-300/70">
-                                        ✅ Binance/USDT: busca al usuario Rifamax o pide el QR/dirección al soporte. No se muestran datos aquí.
-                                    </p>
-                                </div>
-                            )}
-
-                            {selected === "ZELLE" && (
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Nombre:</span>
-                                        <span className="text-purple-400 font-medium">{getPaymentDetails("ZELLE").alias}</span>
-                                    </div>
-                                    <p className="text-[10px] text-purple-300/70">
-                                        ✉️ Solicita el correo Zelle al soporte. No se muestran remitentes ni cuentas al cliente.
-                                    </p>
-                                </div>
-                            )}
-
-                            {(selected === "VISA" || selected === "MASTERCARD") && (
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Nombre:</span>
-                                        <span className="text-blue-400 font-medium">{getPaymentDetails(selected).alias}</span>
-                                    </div>
-                                    <p className="text-[10px] text-blue-300/70">
-                                        💳 Datos de tarjeta/cuenta solo vía soporte. No se expone remitente ni número aquí.
-                                    </p>
-                                </div>
-                            )}
-
-                            {selected === "PAYPAL" && (
-                                <div className="space-y-2">
-                                    <p className="text-[10px] text-blue-300/70">
-                                        💰 Solicita el correo/enlace PayPal al soporte. No se expone públicamente.
-                                    </p>
-                                </div>
-                            )}
-
-                            {selected === "GOOGLEPAY" && (
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className="text-white/40">Nombre:</span>
-                                        <span className="text-red-400 font-medium">{getPaymentDetails("GOOGLEPAY").alias}</span>
-                                    </div>
-                                    <p className="text-[10px] text-red-300/70">
-                                        📱 Solicita el correo/número Google Pay al soporte. No se expone aquí.
-                                    </p>
-                                </div>
-                            )}
+                            <div className="space-y-2">
+                                <p className="text-xs text-white/60">
+                                    {getPaymentDetails(selected).instructions}
+                                </p>
+                                <p className="text-[10px] text-red-400 font-bold">
+                                    Nunca compartas comprobantes ni datos fuera del canal oficial. Los datos de pago solo se entregan por soporte autorizado.
+                                </p>
+                            </div>
                         </div>
                     </motion.div>
                 )}
