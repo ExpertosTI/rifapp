@@ -1,0 +1,32 @@
+name: Deploy & Healthcheck
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-deploy-healthcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Run Playwright tests
+        run: npx playwright install && npx playwright test tests/e2e/healthcheck.spec.ts
+      - name: Deploy (ejemplo)
+        run: |
+          echo "Aquí iría el script de despliegue real (docker push, ssh, etc.)"
+      - name: Healthcheck remoto
+        run: |
+          curl -f https://rifapp.renace.space/api/healthz
+      - name: Fallback si falla healthcheck
+        if: failure()
+        run: |
+          echo "Rollback automático o alerta: Healthcheck falló tras despliegue"
